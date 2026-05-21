@@ -3,7 +3,7 @@ package com.woorifisa.won_card_core_server.domain.reward.model.enums;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.woorifisa.won_card_core_server.domain.reward.exception.RewardErrorCode;
+import com.woorifisa.won_card_core_server.domain.reward.exception.code.RewardErrorCode;
 import com.woorifisa.won_card_core_server.global.exception.handler.BusinessException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

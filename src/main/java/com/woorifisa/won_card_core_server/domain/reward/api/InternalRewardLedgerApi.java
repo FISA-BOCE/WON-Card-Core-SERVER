@@ -4,6 +4,8 @@ import com.woorifisa.won_card_core_server.domain.reward.dto.response.RewardLedge
 import com.woorifisa.won_card_core_server.domain.reward.service.RewardLedgerService;
 import com.woorifisa.won_card_core_server.global.response.ApiResponse;
 import com.woorifisa.won_card_core_server.global.response.SuccessStatus;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,10 +17,12 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "Reward", description = "자동 투자 리워드 관련 API")
 public class InternalRewardLedgerApi {
 
     private final RewardLedgerService rewardLedgerService;
 
+    @Operation(summary = "자동 투자 리워드 목록 조회", description = "자동 투자 된 리워드 목록 조회 페이지에서 사용되는 API입니다.")
     @GetMapping("/internal/cards/rewards/ledger")
     public ResponseEntity<ApiResponse<RewardLedgerResponse>> getRewardLedger(
             @RequestHeader("X-Card-User-UUID") UUID cardUserUuid,

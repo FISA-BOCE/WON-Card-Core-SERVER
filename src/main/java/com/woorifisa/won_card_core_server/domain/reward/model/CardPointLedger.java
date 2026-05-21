@@ -12,6 +12,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -64,11 +65,11 @@ public class CardPointLedger extends BaseTimeEntity {
 
     public Long getDisplayPointAmount() {
         if (inAmount != null && inAmount.compareTo(BigDecimal.ZERO) > 0) {
-            return inAmount.longValue();
+            return inAmount.setScale(0, RoundingMode.DOWN).longValue();
         }
 
         if (outAmount != null && outAmount.compareTo(BigDecimal.ZERO) > 0) {
-            return outAmount.longValue();
+            return outAmount.setScale(0, RoundingMode.DOWN).longValue();
         }
 
         return 0L;

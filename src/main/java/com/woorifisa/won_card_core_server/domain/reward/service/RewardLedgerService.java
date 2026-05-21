@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.Year;
 import java.util.List;
@@ -42,7 +43,7 @@ public class RewardLedgerService {
     private Long getTotalAccumulatedAmount(UUID cardUserUuid, LocalDateTime startDateTime, LocalDateTime endDateTime) {
         BigDecimal totalAmount = cardPointLedgerRepository.sumEarnAmount(cardUserUuid, startDateTime, endDateTime);
 
-        return totalAmount.longValue();
+        return totalAmount.setScale(0, RoundingMode.DOWN).longValue();
     }
 
     private List<CardPointLedger> getLedgers(UUID cardUserUuid, RewardProcessStatus rewardProcessStatus,

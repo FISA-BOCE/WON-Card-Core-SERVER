@@ -35,3 +35,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### .yml ###
+src/test/resources/application-test.yml

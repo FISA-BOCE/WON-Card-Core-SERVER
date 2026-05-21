@@ -18,6 +18,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.Year;
 import java.util.List;
 import java.util.UUID;
 
@@ -75,7 +76,7 @@ class RewardLedgerServiceTest {
         RewardLedgerResponse response = rewardLedgerService.getRewardLedger(CARD_USER_UUID, null);
 
         // then
-        assertThat(response.baseYear()).isGreaterThanOrEqualTo(2026);
+        assertThat(response.baseYear()).isEqualTo(Year.now().getValue());
         assertThat(response.totalAccumulatedAmount()).isEqualTo(12450L);
         assertThat(response.ledgers()).hasSize(2);
 

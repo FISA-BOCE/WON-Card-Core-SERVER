@@ -1,17 +1,19 @@
 package com.woorifisa.won_card_core_server.domain.reward.api;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.woorifisa.won_card_core_server.domain.reward.dto.response.RewardLedgerResponse;
 import com.woorifisa.won_card_core_server.domain.reward.service.RewardLedgerService;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +53,7 @@ class InternalRewardLedgerApiTest {
                 )
         );
 
-        given(rewardLedgerService.getRewardLedger(any(UUID.class), anyString()))
+        given(rewardLedgerService.getRewardLedger(eq(CARD_USER_UUID), eq("EARN")))
                 .willReturn(response);
 
         // when & then
@@ -71,6 +73,8 @@ class InternalRewardLedgerApiTest {
                 .andExpect(jsonPath("$.data.ledgers[0].baseMonth").value("2026-05"))
                 .andExpect(jsonPath("$.data.ledgers[0].pointAmount").value(12450))
                 .andExpect(jsonPath("$.data.ledgers[0].type").value("EARN"));
+
+        then(rewardLedgerService).should().getRewardLedger(CARD_USER_UUID, "EARN");
     }
 
     @Test
@@ -83,7 +87,7 @@ class InternalRewardLedgerApiTest {
                 List.of()
         );
 
-        given(rewardLedgerService.getRewardLedger(any(UUID.class), any()))
+        given(rewardLedgerService.getRewardLedger(eq(CARD_USER_UUID), isNull()))
                 .willReturn(response);
 
         // when & then
@@ -99,5 +103,7 @@ class InternalRewardLedgerApiTest {
                 .andExpect(jsonPath("$.data.baseYear").value(2026))
                 .andExpect(jsonPath("$.data.totalAccumulatedAmount").value(12450))
                 .andExpect(jsonPath("$.data.ledgers").isArray());
+
+        then(rewardLedgerService).should().getRewardLedger(CARD_USER_UUID, null);
     }
 }

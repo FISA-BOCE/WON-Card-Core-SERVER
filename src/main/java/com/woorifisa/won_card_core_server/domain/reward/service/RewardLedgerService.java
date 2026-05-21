@@ -1,11 +1,9 @@
 package com.woorifisa.won_card_core_server.domain.reward.service;
 
 import com.woorifisa.won_card_core_server.domain.reward.dto.response.RewardLedgerResponse;
-import com.woorifisa.won_card_core_server.domain.reward.exception.RewardErrorCode;
 import com.woorifisa.won_card_core_server.domain.reward.model.CardPointLedger;
 import com.woorifisa.won_card_core_server.domain.reward.model.enums.RewardProcessStatus;
 import com.woorifisa.won_card_core_server.domain.reward.repository.CardPointLedgerRepository;
-import com.woorifisa.won_card_core_server.global.exception.handler.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,10 +31,6 @@ public class RewardLedgerService {
         Long totalAccumulatedAmount = getTotalAccumulatedAmount(cardUserUuid, startDateTime, endDateTime);
 
         List<CardPointLedger> ledgers = getLedgers(cardUserUuid, rewardProcessStatus, startDateTime, endDateTime);
-
-        if (ledgers.isEmpty()) {
-            throw new BusinessException(RewardErrorCode.REWARD_LEDGER_NOT_FOUND);
-        }
 
         return new RewardLedgerResponse(baseYear, totalAccumulatedAmount,
                 ledgers.stream()

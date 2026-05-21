@@ -123,8 +123,20 @@ class RewardLedgerServiceTest {
     }
 
     @Test
-    @DisplayName("리워드 내역이 없으면 예외가 발생한다")
-    void getRewardLedgerNotFound() {
+    @DisplayName("유효하지 않은 type이면 예외가 발생한다")
+    void getRewardLedgerInvalidType() {
+        assertThatThrownBy(() -> rewardLedgerService.getRewardLedger(CARD_USER_UUID, "BAD"))
+                .isInstanceOf(BusinessException.class)
+                .satisfies(exception -> {
+                    BusinessException businessException = (BusinessException) exception;
+                    assertThat(businessException.getErrorCode())
+                            .isEqualTo(RewardErrorCode.INVALID_REWARD_LEDGER_TYPE);
+                });
+    }
+
+    @Test
+    @DisplayName("리워드 내역이 없으면 빈 목록을 반환한다")
+    void getRewardLedgerEmpty() {
         // given
         given(cardPointLedgerRepository.sumEarnAmount(
                 eq(CARD_USER_UUID),
@@ -138,26 +150,19 @@ class RewardLedgerServiceTest {
                 any(LocalDateTime.class)
         )).willReturn(List.of());
 
-        // when & then
-        assertThatThrownBy(() -> rewardLedgerService.getRewardLedger(CARD_USER_UUID, null))
-                .isInstanceOf(BusinessException.class)
-                .satisfies(exception -> {
-                    BusinessException businessException = (BusinessException) exception;
-                    assertThat(businessException.getErrorCode())
-                            .isEqualTo(RewardErrorCode.REWARD_LEDGER_NOT_FOUND);
-                });
-    }
+        // when
+        RewardLedgerResponse response = rewardLedgerService.getRewardLedger(CARD_USER_UUID, null);
 
-    @Test
-    @DisplayName("유효하지 않은 type이면 예외가 발생한다")
-    void getRewardLedgerInvalidType() {
-        assertThatThrownBy(() -> rewardLedgerService.getRewardLedger(CARD_USER_UUID, "BAD"))
-                .isInstanceOf(BusinessException.class)
-                .satisfies(exception -> {
-                    BusinessException businessException = (BusinessException) exception;
-                    assertThat(businessException.getErrorCode())
-                            .isEqualTo(RewardErrorCode.INVALID_REWARD_LEDGER_TYPE);
-                });
+        // then
+        assertThat(response.baseYear()).isEqualTo(Year.now().getValue());
+        assertThat(response.totalAccumulatedAmount()).isEqualTo(0L);
+        assertThat(response.ledgers()).isEmpty();
+
+        then(cardPointLedgerRepository).should().findRewardLedgers(
+                eq(CARD_USER_UUID),
+                any(LocalDateTime.class),
+                any(LocalDateTime.class)
+        );
     }
 
     private CardPointLedger newCardPointLedger(

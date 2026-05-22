@@ -184,12 +184,12 @@ class RewardLedgerServiceTest {
                 LocalDateTime.of(2026, 5, 7, 14, 32)
         );
 
-        CardPerformance performance = newCardPerformance(performanceId, BigDecimal.valueOf(820000), BigDecimal.valueOf(1.0)
-        );
+        CardPerformance performance = newCardPerformance(performanceId, BigDecimal.valueOf(820000), BigDecimal.valueOf(1.0));
 
         given(cardPointLedgerRepository.findById(pointLedgerId)).willReturn(Optional.of(pointLedger));
 
-        given(cardPerformanceRepository.findByPerformanceId(performanceId)).willReturn(Optional.of(performance));
+        given(cardPerformanceRepository.findByPerformanceIdAndCardUserUuid(performanceId, CARD_USER_UUID))
+                .willReturn(Optional.of(performance));
 
         // when
         RewardLedgerDetailResponse response =
@@ -228,7 +228,8 @@ class RewardLedgerServiceTest {
 
         given(cardPointLedgerRepository.findById(pointLedgerId)).willReturn(Optional.of(pointLedger));
 
-        given(cardPerformanceRepository.findByPerformanceId(performanceId)).willReturn(Optional.of(performance));
+        given(cardPerformanceRepository.findByPerformanceIdAndCardUserUuid(performanceId, CARD_USER_UUID))
+                .willReturn(Optional.of(performance));
 
         // when
         RewardLedgerDetailResponse response =
@@ -309,7 +310,8 @@ class RewardLedgerServiceTest {
 
         given(cardPointLedgerRepository.findById(pointLedgerId)).willReturn(Optional.of(pointLedger));
 
-        given(cardPerformanceRepository.findByPerformanceId(performanceId)).willReturn(Optional.empty());
+        given(cardPerformanceRepository.findByPerformanceIdAndCardUserUuid(performanceId, CARD_USER_UUID))
+                .willReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> rewardLedgerService.getRewardLedgerDetail(CARD_USER_UUID, pointLedgerId))

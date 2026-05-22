@@ -60,10 +60,4 @@ public class CardPerformance extends BaseTimeEntity {
     @Column(name = "confirmed_at")
     private LocalDateTime confirmedAt;
 
-    public Long getPreviousMonthSpendAmountAsLong() {
-        return previousMonthSpendAmount == null
-                ? 0L
-                : previousMonthSpendAmount.setScale(0, java.math.RoundingMode.DOWN).longValue();
-    }
-
 }

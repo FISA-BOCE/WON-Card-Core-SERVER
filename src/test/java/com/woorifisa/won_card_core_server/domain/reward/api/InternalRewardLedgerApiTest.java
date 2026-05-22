@@ -87,7 +87,7 @@ class InternalRewardLedgerApiTest {
         RewardLedgerDetailResponse response = new RewardLedgerDetailResponse(
                 pointLedgerId, "2026-05", "EARN",
                 12450L, LocalDateTime.of(2026, 5, 7, 14, 32),
-                new RewardLedgerDetailResponse.EarnRewardDetail(820000L, 500000L)
+                new RewardLedgerDetailResponse.RewardDetail(820000L, 500000L, 0L)
         );
 
         given(rewardLedgerService.getRewardLedgerDetail(eq(CARD_USER_UUID), eq(pointLedgerId)))
@@ -108,7 +108,8 @@ class InternalRewardLedgerApiTest {
                 .andExpect(jsonPath("$.data.type").value("EARN"))
                 .andExpect(jsonPath("$.data.pointAmount").value(12450))
                 .andExpect(jsonPath("$.data.detail.previousMonthSpendAmount").value(820000))
-                .andExpect(jsonPath("$.data.detail.targetSpendAmount").value(500000));
+                .andExpect(jsonPath("$.data.detail.targetSpendAmount").value(500000))
+                .andExpect(jsonPath("$.data.detail.shortfallAmount").value(0));
     }
 
     @Test

@@ -10,13 +10,13 @@ public record RewardLedgerDetailResponse(
         String type,
         Long pointAmount,
         LocalDateTime occurredAt,
-        Object detail
+        RewardDetail detail
 ) {
 
     public static RewardLedgerDetailResponse from(
             CardPointLedger pointLedger,
             Long pointAmount,
-            Object detail
+            RewardDetail detail
     ) {
         return new RewardLedgerDetailResponse(
                 pointLedger.getPointLedgerId(),
@@ -28,13 +28,7 @@ public record RewardLedgerDetailResponse(
         );
     }
 
-    public record EarnRewardDetail(
-            Long previousMonthSpendAmount,
-            Long targetSpendAmount
-    ) {
-    }
-
-    public record NotAppliedRewardDetail(
+    public record RewardDetail(
             Long previousMonthSpendAmount,
             Long targetSpendAmount,
             Long shortfallAmount

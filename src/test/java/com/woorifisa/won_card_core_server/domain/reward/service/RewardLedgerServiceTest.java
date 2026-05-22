@@ -202,14 +202,10 @@ class RewardLedgerServiceTest {
         assertThat(response.pointAmount()).isEqualTo(12450L);
         assertThat(response.occurredAt()).isEqualTo(LocalDateTime.of(2026, 5, 7, 14, 32));
 
-        assertThat(response.detail())
-                .isInstanceOf(RewardLedgerDetailResponse.EarnRewardDetail.class);
+        assertThat(response.detail().previousMonthSpendAmount()).isEqualTo(820000L);
+        assertThat(response.detail().targetSpendAmount()).isEqualTo(500000L);
+        assertThat(response.detail().shortfallAmount()).isEqualTo(0L);
 
-        RewardLedgerDetailResponse.EarnRewardDetail detail =
-                (RewardLedgerDetailResponse.EarnRewardDetail) response.detail();
-
-        assertThat(detail.previousMonthSpendAmount()).isEqualTo(820000L);
-        assertThat(detail.targetSpendAmount()).isEqualTo(500000L);
     }
 
     @Test
@@ -241,15 +237,9 @@ class RewardLedgerServiceTest {
         assertThat(response.type()).isEqualTo("NOT_APPLIED");
         assertThat(response.pointAmount()).isEqualTo(0L);
 
-        assertThat(response.detail())
-                .isInstanceOf(RewardLedgerDetailResponse.NotAppliedRewardDetail.class);
-
-        RewardLedgerDetailResponse.NotAppliedRewardDetail detail =
-                (RewardLedgerDetailResponse.NotAppliedRewardDetail) response.detail();
-
-        assertThat(detail.previousMonthSpendAmount()).isEqualTo(380000L);
-        assertThat(detail.targetSpendAmount()).isEqualTo(500000L);
-        assertThat(detail.shortfallAmount()).isEqualTo(120000L);
+        assertThat(response.detail().previousMonthSpendAmount()).isEqualTo(380000L);
+        assertThat(response.detail().targetSpendAmount()).isEqualTo(500000L);
+        assertThat(response.detail().shortfallAmount()).isEqualTo(120000L);
     }
 
     @Test

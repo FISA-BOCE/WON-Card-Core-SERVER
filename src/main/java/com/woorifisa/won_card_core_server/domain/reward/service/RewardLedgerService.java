@@ -73,8 +73,7 @@ public class RewardLedgerService {
         validateRewardProcessStatus(pointLedger);
 
         CardPerformance performance = getPerformance(pointLedger);
-        Object detail = createRewardDetail(pointLedger, performance);
-
+        RewardLedgerDetailResponse.RewardDetail detail = createRewardDetail(pointLedger, performance);
         Long pointAmount = getDetailPointAmount(pointLedger);
 
         return RewardLedgerDetailResponse.from(pointLedger, pointAmount, detail);
@@ -88,33 +87,16 @@ public class RewardLedgerService {
         return pointLedger.getDisplayPointAmount();
     }
 
-    private Object createRewardDetail(
+    private RewardLedgerDetailResponse.RewardDetail createRewardDetail(
             CardPointLedger pointLedger,
             CardPerformance performance
     ) {
-        return switch (pointLedger.getRewardProcessStatus()) {
-            case EARN -> createEarnDetail(performance);
-            case NOT_APPLIED -> createNotAppliedDetail(performance);
-            case ALL -> throw new BusinessException(RewardErrorCode.INVALID_REWARD_LEDGER_STATUS);
-        };
-    }
-
-    private RewardLedgerDetailResponse.EarnRewardDetail createEarnDetail(
-            CardPerformance performance
-    ) {
-        return new RewardLedgerDetailResponse.EarnRewardDetail(
-                toLong(performance.getPreviousMonthSpendAmount()),
-                REWARD_TARGET_AMOUNT
-        );
-    }
-
-    private RewardLedgerDetailResponse.NotAppliedRewardDetail createNotAppliedDetail(
-            CardPerformance performance
-    ) {
         Long previousMonthSpendAmount = toLong(performance.getPreviousMonthSpendAmount());
-        Long shortfallAmount = Math.max(REWARD_TARGET_AMOUNT - previousMonthSpendAmount, 0L);
+        Long shortfallAmount = pointLedger.getRewardProcessStatus() == RewardProcessStatus.NOT_APPLIED
+                ? Math.max(REWARD_TARGET_AMOUNT - previousMonthSpendAmount, 0L)
+                : 0L;
 
-        return new RewardLedgerDetailResponse.NotAppliedRewardDetail(
+        return new RewardLedgerDetailResponse.RewardDetail(
                 previousMonthSpendAmount,
                 REWARD_TARGET_AMOUNT,
                 shortfallAmount

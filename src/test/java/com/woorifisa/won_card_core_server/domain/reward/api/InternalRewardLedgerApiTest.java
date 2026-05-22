@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.woorifisa.won_card_core_server.domain.reward.dto.response.RewardLedgerDetailResponse;
 import com.woorifisa.won_card_core_server.domain.reward.dto.response.RewardLedgerResponse;
 import com.woorifisa.won_card_core_server.domain.reward.service.RewardLedgerService;
 
@@ -75,6 +76,40 @@ class InternalRewardLedgerApiTest {
                 .andExpect(jsonPath("$.data.ledgers[0].type").value("EARN"));
 
         then(rewardLedgerService).should().getRewardLedger(CARD_USER_UUID, "EARN");
+    }
+
+    @Test
+    @DisplayName("내부 리워드 내역 상세 조회 API를 호출한다")
+    void getRewardLedgerDetail() throws Exception {
+        // given
+        Long pointLedgerId = 1L;
+
+        RewardLedgerDetailResponse response = new RewardLedgerDetailResponse(
+                pointLedgerId, "2026-05", "EARN",
+                12450L, LocalDateTime.of(2026, 5, 7, 14, 32),
+                new RewardLedgerDetailResponse.RewardDetail(820000L, 500000L, 0L)
+        );
+
+        given(rewardLedgerService.getRewardLedgerDetail(eq(CARD_USER_UUID), eq(pointLedgerId)))
+                .willReturn(response);
+
+        // when & then
+        mockMvc.perform(
+                        get("/internal/cards/rewards/ledger/{pointLedgerId}", pointLedgerId)
+                                .header("X-Card-User-UUID", CARD_USER_UUID.toString())
+                                .header("X-Service-ID", "WON-CARD-CHANNEL")
+                                .header("X-Transaction-ID", "TX-20260512-RWD03")
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.message").value("상세 리워드 내역 조회가 완료되었습니다."))
+                .andExpect(jsonPath("$.data.pointLedgerId").value(1))
+                .andExpect(jsonPath("$.data.baseMonth").value("2026-05"))
+                .andExpect(jsonPath("$.data.type").value("EARN"))
+                .andExpect(jsonPath("$.data.pointAmount").value(12450))
+                .andExpect(jsonPath("$.data.detail.previousMonthSpendAmount").value(820000))
+                .andExpect(jsonPath("$.data.detail.targetSpendAmount").value(500000))
+                .andExpect(jsonPath("$.data.detail.shortfallAmount").value(0));
     }
 
     @Test

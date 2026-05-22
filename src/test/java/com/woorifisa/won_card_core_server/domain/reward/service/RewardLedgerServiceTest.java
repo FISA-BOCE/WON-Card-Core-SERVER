@@ -58,7 +58,7 @@ class RewardLedgerServiceTest {
 
         CardPointLedger holdLedger = newCardPointLedger(
                 1002L,
-                RewardProcessStatus.HOLD,
+                RewardProcessStatus.EARN,
                 BigDecimal.valueOf(5000),
                 null,
                 LocalDateTime.of(2026, 5, 6, 14, 32)
@@ -66,7 +66,7 @@ class RewardLedgerServiceTest {
 
         given(cardPointLedgerRepository.sumEarnAmount(
                 eq(CARD_USER_UUID), any(LocalDateTime.class), any(LocalDateTime.class)
-        )).willReturn(BigDecimal.valueOf(12450));
+        )).willReturn(BigDecimal.valueOf(17450));
 
         given(cardPointLedgerRepository.findRewardLedgers(
                 eq(CARD_USER_UUID), any(LocalDateTime.class), any(LocalDateTime.class)
@@ -77,12 +77,16 @@ class RewardLedgerServiceTest {
 
         // then
         assertThat(response.baseYear()).isEqualTo(Year.now().getValue());
-        assertThat(response.totalAccumulatedAmount()).isEqualTo(12450L);
+        assertThat(response.totalAccumulatedAmount()).isEqualTo(17450L);
         assertThat(response.ledgers()).hasSize(2);
 
         assertThat(response.ledgers().get(0).pointLedgerId()).isEqualTo(1001L);
         assertThat(response.ledgers().get(0).pointAmount()).isEqualTo(12450L);
         assertThat(response.ledgers().get(0).type()).isEqualTo("EARN");
+
+        assertThat(response.ledgers().get(1).pointLedgerId()).isEqualTo(1002L);
+        assertThat(response.ledgers().get(1).pointAmount()).isEqualTo(5000);
+        assertThat(response.ledgers().get(1).type()).isEqualTo("EARN");
 
         then(cardPointLedgerRepository).should().findRewardLedgers(
                 eq(CARD_USER_UUID), any(LocalDateTime.class), any(LocalDateTime.class)

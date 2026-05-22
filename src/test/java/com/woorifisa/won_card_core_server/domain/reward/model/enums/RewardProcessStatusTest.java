@@ -23,7 +23,6 @@ class RewardProcessStatusTest {
     void fromValidType() {
         assertThat(RewardProcessStatus.from("EARN")).isEqualTo(RewardProcessStatus.EARN);
         assertThat(RewardProcessStatus.from("NOT_APPLIED")).isEqualTo(RewardProcessStatus.NOT_APPLIED);
-        assertThat(RewardProcessStatus.from("HOLD")).isEqualTo(RewardProcessStatus.HOLD);
         assertThat(RewardProcessStatus.from("earn")).isEqualTo(RewardProcessStatus.EARN);
     }
 

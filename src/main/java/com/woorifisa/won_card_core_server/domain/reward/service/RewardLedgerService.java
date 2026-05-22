@@ -33,6 +33,11 @@ public class RewardLedgerService {
     private final CardPerformanceRepository cardPerformanceRepository;
 
     public RewardLedgerResponse getRewardLedger(UUID cardUserUuid, String type) {
+
+        if (cardUserUuid == null) {
+            throw new BusinessException(RewardErrorCode.REWARD_LEDGER_NOT_FOUND);
+        }
+
         RewardProcessStatus rewardProcessStatus = RewardProcessStatus.from(type);
 
         int baseYear = Year.now().getValue();

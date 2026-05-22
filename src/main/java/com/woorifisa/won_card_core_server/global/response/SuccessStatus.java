@@ -10,7 +10,8 @@ public enum SuccessStatus {
     CREATED(HttpStatus.CREATED, "COM_201_001", "CREATED"),
     NO_CONTENT(HttpStatus.NO_CONTENT, "COM_204_001", "NO_CONTENT"),
 
-    REWARD_LEDGER_FOUND(HttpStatus.OK, "REWARD_200_001", "리워드 내역 조회가 완료되었습니다.");
+    REWARD_LEDGER_FOUND(HttpStatus.OK, "REWARD_200_001", "리워드 내역 조회가 완료되었습니다."),
+    REWARD_LEDGER_DETAIL_FOUND(HttpStatus.OK, "REWARD_200_002", "상세 리워드 내역 조회가 완료되었습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

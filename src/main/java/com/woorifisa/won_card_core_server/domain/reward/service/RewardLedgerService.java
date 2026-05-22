@@ -128,7 +128,7 @@ public class RewardLedgerService {
             throw new BusinessException(CardPerformanceErrorCode.PERFORMANCE_NOT_FOUND);
         }
 
-        return cardPerformanceRepository.findByPerformanceId(performanceId)
+        return cardPerformanceRepository.findByPerformanceIdAndCardUserUuid(performanceId, pointLedger.getCardUserUuid())
                 .orElseThrow(() -> new BusinessException(CardPerformanceErrorCode.PERFORMANCE_NOT_FOUND));
     }
 

@@ -28,7 +28,7 @@ public interface CardPointLedgerRepository extends JpaRepository<CardPointLedger
             @Param("endDateTime") LocalDateTime endDateTime
     );
 
-    // 해당 카드 사용자의 현재 연도 리워드 원장 중 EARN / NOT_APPLIED / HOLD 중 특정 상태만 조회
+    // 해당 카드 사용자의 현재 연도 리워드 원장 중 EARN / NOT_APPLIED 중 특정 상태만 조회
     @Query("""
             select l
             from CardPointLedger l

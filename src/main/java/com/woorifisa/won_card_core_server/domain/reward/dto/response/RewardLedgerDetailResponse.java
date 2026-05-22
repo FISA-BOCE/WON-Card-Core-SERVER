@@ -1,6 +1,7 @@
 package com.woorifisa.won_card_core_server.domain.reward.dto.response;
 
 import com.woorifisa.won_card_core_server.domain.reward.model.CardPointLedger;
+import com.woorifisa.won_card_core_server.domain.reward.model.enums.RewardProcessStatus;
 
 import java.time.LocalDateTime;
 
@@ -21,7 +22,9 @@ public record RewardLedgerDetailResponse(
                 pointLedger.getPointLedgerId(),
                 pointLedger.getBaseMonth(),
                 pointLedger.getRewardProcessStatus().name(),
-                pointLedger.getDisplayPointAmount(),
+                pointLedger.getRewardProcessStatus() == RewardProcessStatus.NOT_APPLIED
+                        ? 0L
+                        : pointLedger.getDisplayPointAmount(),
                 pointLedger.getOccurredAt(),
                 detail
         );

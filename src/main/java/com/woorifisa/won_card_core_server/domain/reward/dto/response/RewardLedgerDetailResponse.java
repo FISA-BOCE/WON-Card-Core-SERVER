@@ -2,7 +2,6 @@ package com.woorifisa.won_card_core_server.domain.reward.dto.response;
 
 import com.woorifisa.won_card_core_server.domain.reward.model.CardPointLedger;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public record RewardLedgerDetailResponse(

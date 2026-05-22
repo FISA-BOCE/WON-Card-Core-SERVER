@@ -75,7 +75,17 @@ public class RewardLedgerService {
         CardPerformance performance = getPerformance(pointLedger);
         Object detail = createRewardDetail(pointLedger, performance);
 
-        return RewardLedgerDetailResponse.from(pointLedger, detail);
+        Long pointAmount = getDetailPointAmount(pointLedger);
+
+        return RewardLedgerDetailResponse.from(pointLedger, pointAmount, detail);
+    }
+
+    private Long getDetailPointAmount(CardPointLedger pointLedger) {
+        if (pointLedger.getRewardProcessStatus() == RewardProcessStatus.NOT_APPLIED) {
+            return 0L;
+        }
+
+        return pointLedger.getDisplayPointAmount();
     }
 
     private Object createRewardDetail(

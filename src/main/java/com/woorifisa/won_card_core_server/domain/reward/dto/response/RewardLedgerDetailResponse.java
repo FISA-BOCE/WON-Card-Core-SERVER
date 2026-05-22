@@ -16,15 +16,14 @@ public record RewardLedgerDetailResponse(
 
     public static RewardLedgerDetailResponse from(
             CardPointLedger pointLedger,
+            Long pointAmount,
             Object detail
     ) {
         return new RewardLedgerDetailResponse(
                 pointLedger.getPointLedgerId(),
                 pointLedger.getBaseMonth(),
                 pointLedger.getRewardProcessStatus().name(),
-                pointLedger.getRewardProcessStatus() == RewardProcessStatus.NOT_APPLIED
-                        ? 0L
-                        : pointLedger.getDisplayPointAmount(),
+                pointAmount,
                 pointLedger.getOccurredAt(),
                 detail
         );

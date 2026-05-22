@@ -1,7 +1,6 @@
 package com.woorifisa.won_card_core_server.domain.reward.dto.response;
 
 import com.woorifisa.won_card_core_server.domain.reward.model.CardPointLedger;
-import com.woorifisa.won_card_core_server.domain.reward.model.enums.RewardProcessStatus;
 
 import java.time.LocalDateTime;
 

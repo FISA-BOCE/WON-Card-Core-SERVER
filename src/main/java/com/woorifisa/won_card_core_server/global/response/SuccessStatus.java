@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 public enum SuccessStatus {
 
     OK(HttpStatus.OK, "COM_200_001", "OK"),
-    CREATED(HttpStatus.CREATED, "COM_201_001", "CREATED"),
+    CREATED(HttpStatus.CREATED, "COM_201_001", "카드 신청이 완료되었습니다."),
     NO_CONTENT(HttpStatus.NO_CONTENT, "COM_204_001", "NO_CONTENT");
 
     private final HttpStatus httpStatus;

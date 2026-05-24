@@ -12,6 +12,7 @@ import com.woorifisa.won_card_core_server.domain.card.repository.CardUserReposit
 import com.woorifisa.won_card_core_server.global.exception.handler.BusinessException;
 import com.woorifisa.won_card_core_server.global.util.HashUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,7 +41,11 @@ public class CardApplicationService {
                 .orElseGet(() -> createCardUser(request));
 
         Card card = createCard(cardUser);
-        return CardApplicationResponse.from(cardRepository.save(card));
+        try {
+            return CardApplicationResponse.from(cardRepository.saveAndFlush(card));
+        } catch (DataIntegrityViolationException e) {
+            throw new BusinessException(CardErrorCode.CARD_CONSTRAINT_CONFLICT);
+        }
     }
 
     private CardUser issueForExistingUser(CardUser cardUser) {
@@ -73,7 +78,11 @@ public class CardApplicationService {
                 .addressEnc(request.addressEnc())
                 .build();
 
-        return cardUserRepository.save(cardUser);
+        try {
+            return cardUserRepository.saveAndFlush(cardUser);
+        } catch (DataIntegrityViolationException e) {
+            throw new BusinessException(CardErrorCode.CARD_CONSTRAINT_CONFLICT);
+        }
     }
 
     private void validateAgreement(CardApplicationRequest request) {

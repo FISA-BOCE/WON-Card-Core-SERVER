@@ -48,7 +48,7 @@ public class CardUser extends BaseTimeEntity {
     @Column(name = "gender", nullable = false, length = 1)
     private Gender gender;
 
-    @Column(name = "ci_hash")
+    @Column(name = "ci_hash", nullable = false)
     private String ciHash;
 
     @Builder.Default

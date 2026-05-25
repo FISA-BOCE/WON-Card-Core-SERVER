@@ -10,6 +10,7 @@ import com.woorifisa.won_card_core_server.domain.card.model.CardUserStatus;
 import com.woorifisa.won_card_core_server.domain.card.repository.CardRepository;
 import com.woorifisa.won_card_core_server.domain.card.repository.CardUserRepository;
 import com.woorifisa.won_card_core_server.global.exception.handler.BusinessException;
+import com.woorifisa.won_card_core_server.global.security.TextEncryptor;
 import com.woorifisa.won_card_core_server.global.util.HashUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -30,6 +31,7 @@ public class CardApplicationService {
 
     private final CardUserRepository cardUserRepository;
     private final CardRepository cardRepository;
+    private final TextEncryptor textEncryptor;
     private final SecureRandom secureRandom = new SecureRandom();
 
     @Transactional
@@ -129,15 +131,11 @@ public class CardApplicationService {
 
     private String createCiHash(CardApplicationRequest request) {
         String source = String.join("|",
-                request.userNameEnc(),
-                nullable(request.birthDateEnc()),
+                textEncryptor.decrypt(request.userNameEnc()),
+                textEncryptor.decrypt(request.birthDateEnc()),
                 request.gender().name(),
-                nullable(request.telEnc())
+                textEncryptor.decrypt(request.telEnc())
         );
         return HashUtils.sha256(source);
-    }
-
-    private String nullable(String value) {
-        return value == null ? "" : value;
     }
 }

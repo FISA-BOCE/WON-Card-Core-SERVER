@@ -8,6 +8,7 @@ import com.woorifisa.won_card_core_server.domain.card.repository.CardRepository;
 import com.woorifisa.won_card_core_server.domain.card.repository.CardUserRepository;
 import com.woorifisa.won_card_core_server.domain.card.service.CardApplicationService;
 import com.woorifisa.won_card_core_server.global.exception.handler.BusinessException;
+import com.woorifisa.won_card_core_server.global.security.TextEncryptor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,9 @@ class WonCardCoreServerApplicationTests {
 
     @Autowired
     private CardUserRepository cardUserRepository;
+
+    @Autowired
+    private TextEncryptor textEncryptor;
 
     @BeforeEach
     void setUp() {
@@ -96,14 +100,14 @@ class WonCardCoreServerApplicationTests {
     private CardApplicationRequest createRequest(String userUuid, boolean isAgree) {
         return new CardApplicationRequest(
                 userUuid,
-                "userNameEnc",
-                "birthDateEnc",
+                textEncryptor.encrypt("홍길동"),
+                textEncryptor.encrypt("19900101"),
                 Gender.M,
                 "KR",
                 isAgree,
-                "telEnc",
-                "emailEnc",
-                "addressEnc"
+                textEncryptor.encrypt("01012345678"),
+                textEncryptor.encrypt("test@example.com"),
+                textEncryptor.encrypt("서울시 중구")
         );
     }
 }

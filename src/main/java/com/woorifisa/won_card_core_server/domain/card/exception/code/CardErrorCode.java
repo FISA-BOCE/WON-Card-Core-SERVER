@@ -1,4 +1,4 @@
-package com.woorifisa.won_card_core_server.domain.card.exception;
+package com.woorifisa.won_card_core_server.domain.card.exception.code;
 
 import com.woorifisa.won_card_core_server.global.exception.code.ErrorCode;
 import org.springframework.http.HttpStatus;

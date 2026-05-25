@@ -2,7 +2,7 @@ package com.woorifisa.won_card_core_server;
 
 import com.woorifisa.won_card_core_server.domain.card.dto.request.CardApplicationRequest;
 import com.woorifisa.won_card_core_server.domain.card.dto.response.CardApplicationResponse;
-import com.woorifisa.won_card_core_server.domain.card.exception.CardErrorCode;
+import com.woorifisa.won_card_core_server.domain.card.exception.code.CardErrorCode;
 import com.woorifisa.won_card_core_server.domain.card.model.Gender;
 import com.woorifisa.won_card_core_server.domain.card.repository.CardRepository;
 import com.woorifisa.won_card_core_server.domain.card.repository.CardUserRepository;

@@ -17,12 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/internal/cards")
-public class CardController {
+public class InternalCardApi {
 
     private final CardApplicationService cardApplicationService;
 
     @PostMapping("/applications")
-    public ResponseEntity<ApiResponse<CardApplicationResponse>> issue(
+    public ResponseEntity<ApiResponse<CardApplicationResponse>> cardApplication(
             @Valid @RequestBody CardApplicationRequest request
     ) {
         CardApplicationResponse response = cardApplicationService.createCardApplication(request);

@@ -3,7 +3,6 @@ package com.woorifisa.won_card_core_server;
 import com.woorifisa.won_card_core_server.domain.card.dto.request.CardApplicationRequest;
 import com.woorifisa.won_card_core_server.domain.card.dto.response.CardApplicationResponse;
 import com.woorifisa.won_card_core_server.domain.card.exception.CardErrorCode;
-import com.woorifisa.won_card_core_server.domain.card.model.CardStatus;
 import com.woorifisa.won_card_core_server.domain.card.model.Gender;
 import com.woorifisa.won_card_core_server.domain.card.repository.CardRepository;
 import com.woorifisa.won_card_core_server.domain.card.repository.CardUserRepository;
@@ -51,7 +50,7 @@ class WonCardCoreServerApplicationTests {
 
         assertThat(response.cardUuid()).isNotBlank();
         assertThat(response.cardNoDisplay()).startsWith("****-****-****-");
-        assertThat(response.cardStatus()).isEqualTo(CardStatus.ACTIVE);
+        assertThat(response.cardStatus()).isEqualTo("ACTIVE");
         assertThat(cardUserRepository.findByUserUuid(request.userUuid())).isPresent();
         assertThat(cardRepository.count()).isEqualTo(1);
     }

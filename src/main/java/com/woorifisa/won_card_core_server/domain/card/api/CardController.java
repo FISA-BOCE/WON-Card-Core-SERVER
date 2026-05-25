@@ -29,6 +29,6 @@ public class CardController {
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ApiResponse.of(SuccessStatus.CREATED, response));
+                .body(ApiResponse.of(SuccessStatus.CARD_APPLICATION_CREATED, response));
     }
 }

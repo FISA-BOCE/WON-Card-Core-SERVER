@@ -44,10 +44,10 @@ class WonCardCoreServerApplicationTests {
     }
 
     @Test
-    void issueCard_createsCardAndCardUser() {
+    void createCardApplication_createsCardAndCardUser() {
         CardApplicationRequest request = createRequest(UUID.randomUUID().toString(), true);
 
-        CardApplicationResponse response = cardApplicationService.issueCard(request);
+        CardApplicationResponse response = cardApplicationService.createCardApplication(request);
 
         assertThat(response.cardUuid()).isNotBlank();
         assertThat(response.cardNoDisplay()).startsWith("****-****-****-");
@@ -57,10 +57,10 @@ class WonCardCoreServerApplicationTests {
     }
 
     @Test
-    void issueCard_whenRequiredTermsNotAgreed_throwsBadRequestAndDoesNotCreateCardUser() {
+    void createCardApplication_whenRequiredTermsNotAgreed_throwsBadRequestAndDoesNotCreateCardUser() {
         CardApplicationRequest request = createRequest(UUID.randomUUID().toString(), false);
 
-        assertThatThrownBy(() -> cardApplicationService.issueCard(request))
+        assertThatThrownBy(() -> cardApplicationService.createCardApplication(request))
                 .isInstanceOfSatisfying(BusinessException.class, exception ->
                         assertThat(exception.getErrorCode()).isEqualTo(CardErrorCode.REQUIRED_TERMS_NOT_AGREED));
 
@@ -69,11 +69,11 @@ class WonCardCoreServerApplicationTests {
     }
 
     @Test
-    void issueCard_whenCardAlreadyExists_throwsConflict() {
+    void createCardApplication_whenCardAlreadyExists_throwsConflict() {
         CardApplicationRequest request = createRequest(UUID.randomUUID().toString(), true);
-        cardApplicationService.issueCard(request);
+        cardApplicationService.createCardApplication(request);
 
-        assertThatThrownBy(() -> cardApplicationService.issueCard(request))
+        assertThatThrownBy(() -> cardApplicationService.createCardApplication(request))
                 .isInstanceOfSatisfying(BusinessException.class, exception ->
                         assertThat(exception.getErrorCode()).isEqualTo(CardErrorCode.CARD_ALREADY_EXISTS));
 
@@ -81,12 +81,12 @@ class WonCardCoreServerApplicationTests {
     }
 
     @Test
-    void issueCard_whenCiHashAlreadyExists_throwsConflict() {
+    void createCardApplication_whenCiHashAlreadyExists_throwsConflict() {
         CardApplicationRequest firstRequest = createRequest(UUID.randomUUID().toString(), true);
         CardApplicationRequest secondRequest = createRequest(UUID.randomUUID().toString(), true);
-        cardApplicationService.issueCard(firstRequest);
+        cardApplicationService.createCardApplication(firstRequest);
 
-        assertThatThrownBy(() -> cardApplicationService.issueCard(secondRequest))
+        assertThatThrownBy(() -> cardApplicationService.createCardApplication(secondRequest))
                 .isInstanceOfSatisfying(BusinessException.class, exception ->
                         assertThat(exception.getErrorCode()).isEqualTo(CardErrorCode.CARD_USER_ALREADY_EXISTS));
 

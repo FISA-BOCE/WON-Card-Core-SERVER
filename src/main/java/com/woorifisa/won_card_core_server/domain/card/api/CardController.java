@@ -25,7 +25,7 @@ public class CardController {
     public ResponseEntity<ApiResponse<CardApplicationResponse>> issue(
             @Valid @RequestBody CardApplicationRequest request
     ) {
-        CardApplicationResponse response = cardApplicationService.issueCard(request);
+        CardApplicationResponse response = cardApplicationService.createCardApplication(request);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)

@@ -33,7 +33,7 @@ public class CardApplicationService {
     private final SecureRandom secureRandom = new SecureRandom();
 
     @Transactional
-    public CardApplicationResponse issueCard(CardApplicationRequest request) {
+    public CardApplicationResponse createCardApplication(CardApplicationRequest request) {
         validateAgreement(request);
 
         CardUser cardUser = cardUserRepository.findByUserUuid(request.userUuid())

@@ -6,14 +6,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.UUID;
 
-public interface CardRepository extends JpaRepository<Card, String> {
+public interface CardRepository extends JpaRepository<Card, UUID> {
 
     @Query("select c from Card c where c.cardUser.cardUserUuid = :cardUserUuid")
-    List<Card> findAllByCardUserUuid(@Param("cardUserUuid") String cardUserUuid);
+    List<Card> findAllByCardUserUuid(@Param("cardUserUuid") UUID cardUserUuid);
 
     @Query("select count(c) > 0 from Card c where c.cardUser.cardUserUuid = :cardUserUuid")
-    boolean existsByCardUserUuid(@Param("cardUserUuid") String cardUserUuid);
+    boolean existsByCardUserUuid(@Param("cardUserUuid") UUID cardUserUuid);
 
     @Query("select count(c) > 0 from Card c where c.cardNoToken = :cardNoToken")
     boolean existsByCardNoToken(@Param("cardNoToken") String cardNoToken);

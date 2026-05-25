@@ -14,6 +14,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.util.UUID;
 
@@ -33,10 +35,12 @@ public class CardUser extends BaseTimeEntity {
 
     @Id
     @Column(name = "card_user_uuid", nullable = false, length = 36)
-    private String cardUserUuid;
+    @JdbcTypeCode(SqlTypes.CHAR)
+    private UUID cardUserUuid;
 
     @Column(name = "user_uuid", nullable = false, length = 36)
-    private String userUuid;
+    @JdbcTypeCode(SqlTypes.CHAR)
+    private UUID userUuid;
 
     @Column(name = "user_name_enc", nullable = false)
     private String userNameEnc;
@@ -74,7 +78,7 @@ public class CardUser extends BaseTimeEntity {
     @PrePersist
     private void generateUuid() {
         if (cardUserUuid == null) {
-            cardUserUuid = UUID.randomUUID().toString();
+            cardUserUuid = UUID.randomUUID();
         }
     }
 }

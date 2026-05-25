@@ -19,6 +19,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -43,7 +45,8 @@ public class Card extends BaseTimeEntity {
 
     @Id
     @Column(name = "card_uuid", nullable = false, length = 36)
-    private String cardUuid;
+    @JdbcTypeCode(SqlTypes.CHAR)
+    private UUID cardUuid;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
@@ -80,7 +83,7 @@ public class Card extends BaseTimeEntity {
     @PrePersist
     private void generateUuid() {
         if (cardUuid == null) {
-            cardUuid = UUID.randomUUID().toString();
+            cardUuid = UUID.randomUUID();
         }
     }
 }

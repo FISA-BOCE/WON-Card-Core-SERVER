@@ -48,11 +48,11 @@ class WonCardCoreServerApplicationTests {
 
     @Test
     void createCardApplication_createsCardAndCardUser() {
-        CardApplicationRequest request = createRequest(UUID.randomUUID().toString(), true);
+        CardApplicationRequest request = createRequest(UUID.randomUUID(), true);
 
         CardApplicationResponse response = cardApplicationService.createCardApplication(request);
 
-        assertThat(response.cardUuid()).isNotBlank();
+        assertThat(response.cardUuid()).isNotNull();
         assertThat(response.cardNoDisplay()).startsWith("****-****-****-");
         assertThat(response.cardStatus()).isEqualTo("ACTIVE");
         assertThat(cardUserRepository.findByUserUuid(request.userUuid())).isPresent();
@@ -61,7 +61,7 @@ class WonCardCoreServerApplicationTests {
 
     @Test
     void createCardApplication_whenRequiredTermsNotAgreed_throwsBadRequestAndDoesNotCreateCardUser() {
-        CardApplicationRequest request = createRequest(UUID.randomUUID().toString(), false);
+        CardApplicationRequest request = createRequest(UUID.randomUUID(), false);
 
         assertThatThrownBy(() -> cardApplicationService.createCardApplication(request))
                 .isInstanceOfSatisfying(BusinessException.class, exception ->
@@ -73,7 +73,7 @@ class WonCardCoreServerApplicationTests {
 
     @Test
     void createCardApplication_whenCardAlreadyExists_throwsConflict() {
-        CardApplicationRequest request = createRequest(UUID.randomUUID().toString(), true);
+        CardApplicationRequest request = createRequest(UUID.randomUUID(), true);
         cardApplicationService.createCardApplication(request);
 
         assertThatThrownBy(() -> cardApplicationService.createCardApplication(request))
@@ -85,8 +85,8 @@ class WonCardCoreServerApplicationTests {
 
     @Test
     void createCardApplication_whenCiHashAlreadyExists_throwsConflict() {
-        CardApplicationRequest firstRequest = createRequest(UUID.randomUUID().toString(), true);
-        CardApplicationRequest secondRequest = createRequest(UUID.randomUUID().toString(), true);
+        CardApplicationRequest firstRequest = createRequest(UUID.randomUUID(), true);
+        CardApplicationRequest secondRequest = createRequest(UUID.randomUUID(), true);
         cardApplicationService.createCardApplication(firstRequest);
 
         assertThatThrownBy(() -> cardApplicationService.createCardApplication(secondRequest))
@@ -97,17 +97,17 @@ class WonCardCoreServerApplicationTests {
         assertThat(cardRepository.count()).isEqualTo(1);
     }
 
-    private CardApplicationRequest createRequest(String userUuid, boolean isAgree) {
+    private CardApplicationRequest createRequest(UUID userUuid, boolean isAgree) {
         return new CardApplicationRequest(
                 userUuid,
-                textEncryptor.encrypt("홍길동"),
+                textEncryptor.encrypt("Hong Gil Dong"),
                 textEncryptor.encrypt("19900101"),
                 Gender.M,
                 "KR",
                 isAgree,
                 textEncryptor.encrypt("01012345678"),
                 textEncryptor.encrypt("test@example.com"),
-                textEncryptor.encrypt("서울시 중구")
+                textEncryptor.encrypt("Seoul Jung-gu")
         );
     }
 }

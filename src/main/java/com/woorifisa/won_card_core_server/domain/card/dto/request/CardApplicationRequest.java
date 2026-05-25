@@ -5,10 +5,11 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.util.UUID;
+
 public record CardApplicationRequest(
-        @NotBlank
-        @Size(max = 36)
-        String userUuid,
+        @NotNull
+        UUID userUuid,
 
         @NotBlank
         String userNameEnc,

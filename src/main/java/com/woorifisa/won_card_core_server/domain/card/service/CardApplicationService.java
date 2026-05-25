@@ -131,11 +131,19 @@ public class CardApplicationService {
 
     private String createCiHash(CardApplicationRequest request) {
         String source = String.join("|",
-                textEncryptor.decrypt(request.userNameEnc()),
-                textEncryptor.decrypt(request.birthDateEnc()),
+                decryptRequired(request.userNameEnc()),
+                decryptRequired(request.birthDateEnc()),
                 request.gender().name(),
-                textEncryptor.decrypt(request.telEnc())
+                decryptRequired(request.telEnc())
         );
         return HashUtils.sha256(source);
+    }
+
+    private String decryptRequired(String encryptedValue) {
+        try {
+            return textEncryptor.decrypt(encryptedValue);
+        } catch (RuntimeException e) {
+            throw new BusinessException(CardErrorCode.INVALID_ENCRYPTED_VALUE);
+        }
     }
 }

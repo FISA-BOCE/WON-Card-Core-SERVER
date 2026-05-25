@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @ActiveProfiles("test")
-@SpringBootTest(properties = "app.security.crypto-secret=MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=")
+@SpringBootTest
 class WonCardCoreServerApplicationTests {
 
     @Autowired
@@ -95,6 +95,37 @@ class WonCardCoreServerApplicationTests {
 
         assertThat(cardUserRepository.count()).isEqualTo(1);
         assertThat(cardRepository.count()).isEqualTo(1);
+    }
+
+    @Test
+    void createCardApplication_whenEncryptedValueInvalid_throwsBadRequest() {
+        CardApplicationRequest request = new CardApplicationRequest(
+                UUID.randomUUID(),
+                "invalid-encrypted-value",
+                textEncryptor.encrypt("19900101"),
+                Gender.M,
+                "KR",
+                true,
+                textEncryptor.encrypt("01012345678"),
+                textEncryptor.encrypt("test@example.com"),
+                textEncryptor.encrypt("Seoul Jung-gu")
+        );
+
+        assertThatThrownBy(() -> cardApplicationService.createCardApplication(request))
+                .isInstanceOfSatisfying(BusinessException.class, exception ->
+                        assertThat(exception.getErrorCode()).isEqualTo(CardErrorCode.INVALID_ENCRYPTED_VALUE));
+
+        assertThat(cardUserRepository.count()).isZero();
+        assertThat(cardRepository.count()).isZero();
+    }
+
+    @Test
+    void printEncryptedValuesForPostman() {
+        System.out.println("userNameEnc = " + textEncryptor.encrypt("Hong Gil Dong"));
+        System.out.println("birthDateEnc = " + textEncryptor.encrypt("19900101"));
+        System.out.println("telEnc = " + textEncryptor.encrypt("01012345678"));
+        System.out.println("emailEnc = " + textEncryptor.encrypt("test@example.com"));
+        System.out.println("addressEnc = " + textEncryptor.encrypt("Seoul Jung-gu"));
     }
 
     private CardApplicationRequest createRequest(UUID userUuid, boolean isAgree) {

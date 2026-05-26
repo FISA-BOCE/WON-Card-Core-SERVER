@@ -11,6 +11,11 @@ public enum RewardErrorCode implements ErrorCode {
 
     REWARD_LEDGER_NOT_FOUND(HttpStatus.NOT_FOUND, "REWARD_404_001", "리워드 내역을 찾을 수 없습니다."),
 
+    REWARD_SWEEP_ALREADY_REQUESTED(HttpStatus.CONFLICT, "REWARD_409_001", "이미 스윕 요청된 리워드 원장입니다."),
+
+    REWARD_SWEEP_NOT_ELIGIBLE(HttpStatus.UNPROCESSABLE_ENTITY, "REWARD_422_001", "스윕할 수 없는 리워드 원장입니다."),
+    REWARD_SWEEP_AMOUNT_INVALID(HttpStatus.UNPROCESSABLE_ENTITY, "REWARD_422_002", "스윕 가능한 리워드 금액이 없습니다."),
+
     INVALID_REWARD_LEDGER_STATUS(HttpStatus.INTERNAL_SERVER_ERROR, "REWARD_500_001", "리워드 내역 상태가 올바르지 않습니다.");
 
     private final HttpStatus httpStatus;

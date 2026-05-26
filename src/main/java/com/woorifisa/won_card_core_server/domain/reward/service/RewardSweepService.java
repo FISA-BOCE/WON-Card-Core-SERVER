@@ -1,5 +1,8 @@
 package com.woorifisa.won_card_core_server.domain.reward.service;
 
+import com.woorifisa.won_card_core_server.domain.performance.exception.code.CardPerformanceErrorCode;
+import com.woorifisa.won_card_core_server.domain.performance.model.CardPerformance;
+import com.woorifisa.won_card_core_server.domain.performance.repository.CardPerformanceRepository;
 import com.woorifisa.won_card_core_server.domain.reward.dto.response.RewardSweepRequestResponse;
 import com.woorifisa.won_card_core_server.domain.reward.exception.code.RewardErrorCode;
 import com.woorifisa.won_card_core_server.domain.reward.model.CardPointLedger;
@@ -19,6 +22,7 @@ import java.util.UUID;
 public class RewardSweepService {
 
     private final CardPointLedgerRepository cardPointLedgerRepository;
+    private final CardPerformanceRepository cardPerformanceRepository;
     private final RewardLedgerValidator rewardLedgerValidator;
 
     @Transactional
@@ -40,9 +44,23 @@ public class RewardSweepService {
             throw new BusinessException(RewardErrorCode.REWARD_SWEEP_AMOUNT_INVALID);
         }
 
+        CardPerformance performance = getPerformance(pointLedger);
+
         pointLedger.markSweepRequested();
 
-        return RewardSweepRequestResponse.from(pointLedger, pointAmount);
+        return RewardSweepRequestResponse.from(pointLedger, performance, pointAmount);
+    }
+
+    private CardPerformance getPerformance(CardPointLedger pointLedger) {
+        Long performanceId = pointLedger.getPerformanceId();
+
+        if (performanceId == null) {
+            throw new BusinessException(CardPerformanceErrorCode.PERFORMANCE_NOT_FOUND);
+        }
+
+        return cardPerformanceRepository
+                .findByPerformanceIdAndCardUserUuid(performanceId, pointLedger.getCardUserUuid())
+                .orElseThrow(() -> new BusinessException(CardPerformanceErrorCode.PERFORMANCE_NOT_FOUND));
     }
 
     private void validateSweepEligible(CardPointLedger pointLedger) {

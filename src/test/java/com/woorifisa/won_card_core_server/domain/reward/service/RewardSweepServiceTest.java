@@ -1,5 +1,8 @@
 package com.woorifisa.won_card_core_server.domain.reward.service;
 
+import com.woorifisa.won_card_core_server.domain.performance.exception.code.CardPerformanceErrorCode;
+import com.woorifisa.won_card_core_server.domain.performance.model.CardPerformance;
+import com.woorifisa.won_card_core_server.domain.performance.repository.CardPerformanceRepository;
 import com.woorifisa.won_card_core_server.domain.reward.dto.response.RewardSweepRequestResponse;
 import com.woorifisa.won_card_core_server.domain.reward.exception.code.RewardErrorCode;
 import com.woorifisa.won_card_core_server.domain.reward.model.CardPointLedger;
@@ -25,6 +28,7 @@ import static org.mockito.Mockito.*;
 class RewardSweepServiceTest {
 
     private CardPointLedgerRepository cardPointLedgerRepository;
+    private CardPerformanceRepository cardPerformanceRepository;
     private RewardLedgerValidator rewardLedgerValidator;
     private RewardSweepService rewardSweepService;
 
@@ -33,10 +37,13 @@ class RewardSweepServiceTest {
     @BeforeEach
     void setUp() {
         cardPointLedgerRepository = mock(CardPointLedgerRepository.class);
+        cardPerformanceRepository = mock(CardPerformanceRepository.class);
         rewardLedgerValidator = new RewardLedgerValidator();
 
         rewardSweepService = new RewardSweepService(
-                cardPointLedgerRepository, rewardLedgerValidator
+                cardPointLedgerRepository,
+                cardPerformanceRepository,
+                rewardLedgerValidator
         );
     }
 
@@ -54,8 +61,16 @@ class RewardSweepServiceTest {
                 BigDecimal.ZERO
         );
 
+        CardPerformance performance = createPerformance(
+                10L,
+                cardUserUuid,
+                "2026-05"
+        );
+
         when(cardPointLedgerRepository.findByIdForUpdate(1L))
                 .thenReturn(Optional.of(ledger));
+        when(cardPerformanceRepository.findByPerformanceIdAndCardUserUuid(10L, cardUserUuid))
+                .thenReturn(Optional.of(performance));
 
         // when
         RewardSweepRequestResponse response = rewardSweepService.requestSweep(cardUserUuid, 1L);
@@ -65,16 +80,18 @@ class RewardSweepServiceTest {
 
         assertThat(response.pointLedgerId()).isEqualTo(1L);
         assertThat(response.performanceId()).isEqualTo(10L);
+        assertThat(response.baseMonth()).isEqualTo("2026-05");
         assertThat(response.pointAmount()).isEqualTo(12450L);
         assertThat(response.krwAmount()).isEqualTo(12450L);
         assertThat(response.sweepStatus()).isEqualTo(SweepStatus.REQUESTED.name());
 
         verify(cardPointLedgerRepository).findByIdForUpdate(1L);
+        verify(cardPerformanceRepository).findByPerformanceIdAndCardUserUuid(10L, cardUserUuid);
     }
 
     @Test
     @DisplayName("cardUserUuid가 null이면 예외가 발생한다")
-    void requestSweepNullCardUserUuid() {
+    void requestSweepCardUserUuidNull() {
         // when
         BusinessException exception = assertThrows(
                 BusinessException.class,
@@ -84,11 +101,12 @@ class RewardSweepServiceTest {
         // then
         assertThat(exception.getErrorCode()).isEqualTo(RewardErrorCode.REWARD_LEDGER_NOT_FOUND);
         verify(cardPointLedgerRepository, never()).findByIdForUpdate(any());
+        verify(cardPerformanceRepository, never()).findByPerformanceIdAndCardUserUuid(any(), any());
     }
 
     @Test
     @DisplayName("pointLedgerId가 null이면 예외가 발생한다")
-    void requestSweepNullPointLedgerId() {
+    void requestSweepPointLedgerIdNull() {
         // when
         BusinessException exception = assertThrows(
                 BusinessException.class,
@@ -98,6 +116,7 @@ class RewardSweepServiceTest {
         // then
         assertThat(exception.getErrorCode()).isEqualTo(RewardErrorCode.REWARD_LEDGER_NOT_FOUND);
         verify(cardPointLedgerRepository, never()).findByIdForUpdate(any());
+        verify(cardPerformanceRepository, never()).findByPerformanceIdAndCardUserUuid(any(), any());
     }
 
     @Test
@@ -115,6 +134,7 @@ class RewardSweepServiceTest {
 
         // then
         assertThat(exception.getErrorCode()).isEqualTo(RewardErrorCode.REWARD_LEDGER_NOT_FOUND);
+        verify(cardPerformanceRepository, never()).findByPerformanceIdAndCardUserUuid(any(), any());
     }
 
     @Test
@@ -145,6 +165,7 @@ class RewardSweepServiceTest {
         // then
         assertThat(exception.getErrorCode()).isEqualTo(RewardErrorCode.REWARD_LEDGER_FORBIDDEN);
         assertThat(ledger.getSweepStatus()).isEqualTo(SweepStatus.NONE);
+        verify(cardPerformanceRepository, never()).findByPerformanceIdAndCardUserUuid(any(), any());
     }
 
     @Test
@@ -173,6 +194,7 @@ class RewardSweepServiceTest {
         // then
         assertThat(exception.getErrorCode()).isEqualTo(RewardErrorCode.REWARD_SWEEP_NOT_ELIGIBLE);
         assertThat(ledger.getSweepStatus()).isEqualTo(SweepStatus.NONE);
+        verify(cardPerformanceRepository, never()).findByPerformanceIdAndCardUserUuid(any(), any());
     }
 
     @Test
@@ -201,6 +223,7 @@ class RewardSweepServiceTest {
         // then
         assertThat(exception.getErrorCode()).isEqualTo(RewardErrorCode.REWARD_SWEEP_ALREADY_REQUESTED);
         assertThat(ledger.getSweepStatus()).isEqualTo(SweepStatus.REQUESTED);
+        verify(cardPerformanceRepository, never()).findByPerformanceIdAndCardUserUuid(any(), any());
     }
 
     @Test
@@ -229,6 +252,37 @@ class RewardSweepServiceTest {
         // then
         assertThat(exception.getErrorCode()).isEqualTo(RewardErrorCode.REWARD_SWEEP_AMOUNT_INVALID);
         assertThat(ledger.getSweepStatus()).isEqualTo(SweepStatus.NONE);
+        verify(cardPerformanceRepository, never()).findByPerformanceIdAndCardUserUuid(any(), any());
+    }
+
+    @Test
+    @DisplayName("실적 정보가 없으면 예외가 발생한다")
+    void requestSweepPerformanceNotFound() {
+        // given
+        CardPointLedger ledger = createLedger(
+                1L,
+                cardUserUuid,
+                10L,
+                RewardProcessStatus.EARN,
+                SweepStatus.NONE,
+                BigDecimal.valueOf(12450),
+                BigDecimal.ZERO
+        );
+
+        when(cardPointLedgerRepository.findByIdForUpdate(1L))
+                .thenReturn(Optional.of(ledger));
+        when(cardPerformanceRepository.findByPerformanceIdAndCardUserUuid(10L, cardUserUuid))
+                .thenReturn(Optional.empty());
+
+        // when
+        BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> rewardSweepService.requestSweep(cardUserUuid, 1L)
+        );
+
+        // then
+        assertThat(exception.getErrorCode()).isEqualTo(CardPerformanceErrorCode.PERFORMANCE_NOT_FOUND);
+        assertThat(ledger.getSweepStatus()).isEqualTo(SweepStatus.NONE);
     }
 
     private CardPointLedger createLedger(
@@ -254,6 +308,26 @@ class RewardSweepServiceTest {
             setField(ledger, "outAmount", outAmount);
 
             return ledger;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private CardPerformance createPerformance(
+            Long performanceId,
+            UUID cardUserUuid,
+            String baseMonth
+    ) {
+        try {
+            Constructor<CardPerformance> constructor = CardPerformance.class.getDeclaredConstructor();
+            constructor.setAccessible(true);
+            CardPerformance performance = constructor.newInstance();
+
+            setField(performance, "performanceId", performanceId);
+            setField(performance, "cardUserUuid", cardUserUuid);
+            setField(performance, "baseMonth", baseMonth);
+
+            return performance;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

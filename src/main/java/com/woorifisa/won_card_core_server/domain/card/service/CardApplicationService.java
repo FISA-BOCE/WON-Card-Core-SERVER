@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -35,12 +36,12 @@ public class CardApplicationService {
     private final SecureRandom secureRandom = new SecureRandom();
 
     @Transactional
-    public CardApplicationResponse createCardApplication(CardApplicationRequest request) {
+    public CardApplicationResponse createCardApplication(UUID userUuid, CardApplicationRequest request) {
         validateAgreement(request);
 
-        CardUser cardUser = cardUserRepository.findByUserUuid(request.userUuid())
+        CardUser cardUser = cardUserRepository.findByUserUuid(userUuid)
                 .map(this::issueForExistingUser)
-                .orElseGet(() -> createCardUser(request));
+                .orElseGet(() -> createCardUser(userUuid, request));
 
         Card card = createCard(cardUser);
         try {
@@ -60,14 +61,14 @@ public class CardApplicationService {
         return cardUser;
     }
 
-    private CardUser createCardUser(CardApplicationRequest request) {
+    private CardUser createCardUser(UUID userUuid, CardApplicationRequest request) {
         String ciHash = createCiHash(request);
         if (cardUserRepository.existsByCiHash(ciHash)) {
             throw new BusinessException(CardErrorCode.CARD_USER_ALREADY_EXISTS);
         }
 
         CardUser cardUser = CardUser.builder()
-                .userUuid(request.userUuid())
+                .userUuid(userUuid)
                 .userNameEnc(request.userNameEnc())
                 .birthDateEnc(request.birthDateEnc())
                 .gender(request.gender())

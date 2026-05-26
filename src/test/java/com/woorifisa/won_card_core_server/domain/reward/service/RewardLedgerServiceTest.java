@@ -16,6 +16,7 @@ import com.woorifisa.won_card_core_server.domain.reward.exception.code.RewardErr
 import com.woorifisa.won_card_core_server.domain.reward.model.CardPointLedger;
 import com.woorifisa.won_card_core_server.domain.reward.model.enums.RewardProcessStatus;
 import com.woorifisa.won_card_core_server.domain.reward.repository.CardPointLedgerRepository;
+import com.woorifisa.won_card_core_server.domain.reward.service.validator.RewardLedgerValidator;
 import com.woorifisa.won_card_core_server.global.exception.handler.BusinessException;
 
 import java.lang.reflect.Constructor;
@@ -32,10 +33,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class RewardLedgerServiceTest {
+
+    @Spy
+    private RewardLedgerValidator rewardLedgerValidator;
 
     private static final UUID USER_UUID =
             UUID.fromString("0a31e4b1-2b1d-4b5e-8b82-0fb48e502111");

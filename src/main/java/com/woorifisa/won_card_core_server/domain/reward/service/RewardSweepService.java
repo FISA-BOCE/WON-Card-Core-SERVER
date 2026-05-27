@@ -40,7 +40,7 @@ public class RewardSweepService {
 
         Long pointAmount = pointLedger.getDisplayPointAmount();
 
-        if (pointAmount <= 0) {
+        if (pointAmount == null || pointAmount <= 0) {
             throw new BusinessException(RewardErrorCode.REWARD_SWEEP_AMOUNT_INVALID);
         }
 

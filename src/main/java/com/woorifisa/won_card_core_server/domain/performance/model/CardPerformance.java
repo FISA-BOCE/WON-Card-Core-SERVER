@@ -2,7 +2,18 @@ package com.woorifisa.won_card_core_server.domain.performance.model;
 
 import com.woorifisa.won_card_core_server.domain.card.model.CardUser;
 import com.woorifisa.won_card_core_server.global.entity.BaseTimeEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -89,5 +100,4 @@ public class CardPerformance extends BaseTimeEntity {
             foreignKey = @ForeignKey(name = "fk_card_performance_card_user")
     )
     private CardUser cardUser;
-
 }

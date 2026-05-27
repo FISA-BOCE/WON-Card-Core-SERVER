@@ -8,4 +8,6 @@ import java.util.UUID;
 
 public interface CardPerformanceRepository extends JpaRepository<CardPerformance, Long> {
     Optional<CardPerformance> findByPerformanceIdAndCardUserUuid(Long performanceId, UUID cardUserUuid);
+
+    Optional<CardPerformance> findByCardUserUuidAndBaseMonth(UUID cardUserUuid, String baseMonth);
 }

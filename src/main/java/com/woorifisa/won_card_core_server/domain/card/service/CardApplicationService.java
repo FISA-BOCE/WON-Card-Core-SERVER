@@ -49,14 +49,10 @@ public class CardApplicationService {
                 .orElseGet(() -> createCardUser(userUuid, request));
 
         Card card = createCard(cardUser);
-        try {
-            Card savedCard = cardRepository.saveAndFlush(card);
-            cardPerformanceRepository.saveAndFlush(createCardPerformance(userUuid, cardUser));
+        Card savedCard = saveCard(card);
+        saveCardPerformance(createCardPerformance(userUuid, cardUser));
 
-            return CardApplicationResponse.from(savedCard);
-        } catch (DataIntegrityViolationException e) {
-            throw new BusinessException(CardErrorCode.CARD_CONSTRAINT_CONFLICT);
-        }
+        return CardApplicationResponse.from(savedCard);
     }
 
     private CardUser issueForExistingUser(CardUser cardUser) {
@@ -92,7 +88,7 @@ public class CardApplicationService {
         try {
             return cardUserRepository.saveAndFlush(cardUser);
         } catch (DataIntegrityViolationException e) {
-            throw new BusinessException(CardErrorCode.CARD_CONSTRAINT_CONFLICT);
+            throw new BusinessException(CardErrorCode.CARD_USER_CONSTRAINT_CONFLICT);
         }
     }
 
@@ -118,6 +114,14 @@ public class CardApplicationService {
                 .build();
     }
 
+    private Card saveCard(Card card) {
+        try {
+            return cardRepository.saveAndFlush(card);
+        } catch (DataIntegrityViolationException e) {
+            throw new BusinessException(CardErrorCode.CARD_CONSTRAINT_CONFLICT);
+        }
+    }
+
     private CardPerformance createCardPerformance(UUID userUuid, CardUser cardUser) {
         return CardPerformance.builder()
                 .userUuid(userUuid)
@@ -132,6 +136,14 @@ public class CardApplicationService {
                 .calculatedAt(null)
                 .confirmedAt(null)
                 .build();
+    }
+
+    private void saveCardPerformance(CardPerformance cardPerformance) {
+        try {
+            cardPerformanceRepository.saveAndFlush(cardPerformance);
+        } catch (DataIntegrityViolationException e) {
+            throw new BusinessException(CardErrorCode.CARD_PERFORMANCE_CONSTRAINT_CONFLICT);
+        }
     }
 
     private String generateUniqueCardNo() {

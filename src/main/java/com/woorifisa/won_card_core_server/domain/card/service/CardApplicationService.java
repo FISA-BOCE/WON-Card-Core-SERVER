@@ -9,6 +9,8 @@ import com.woorifisa.won_card_core_server.domain.card.model.CardUser;
 import com.woorifisa.won_card_core_server.domain.card.model.CardUserStatus;
 import com.woorifisa.won_card_core_server.domain.card.repository.CardRepository;
 import com.woorifisa.won_card_core_server.domain.card.repository.CardUserRepository;
+import com.woorifisa.won_card_core_server.domain.performance.model.CardPerformance;
+import com.woorifisa.won_card_core_server.domain.performance.repository.CardPerformanceRepository;
 import com.woorifisa.won_card_core_server.global.exception.handler.BusinessException;
 import com.woorifisa.won_card_core_server.global.security.TextEncryptor;
 import com.woorifisa.won_card_core_server.global.util.HashUtils;
@@ -20,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.UUID;
 
 @Service
@@ -29,9 +32,11 @@ public class CardApplicationService {
     private static final int CARD_NUMBER_LENGTH = 16;
     private static final int CARD_VALID_YEARS = 5;
     private static final BigDecimal DEFAULT_LIMIT_AMOUNT = BigDecimal.ZERO;
+    private static final BigDecimal DEFAULT_PERFORMANCE_AMOUNT = BigDecimal.ZERO;
 
     private final CardUserRepository cardUserRepository;
     private final CardRepository cardRepository;
+    private final CardPerformanceRepository cardPerformanceRepository;
     private final TextEncryptor textEncryptor;
     private final SecureRandom secureRandom = new SecureRandom();
 
@@ -44,11 +49,10 @@ public class CardApplicationService {
                 .orElseGet(() -> createCardUser(userUuid, request));
 
         Card card = createCard(cardUser);
-        try {
-            return CardApplicationResponse.from(cardRepository.saveAndFlush(card));
-        } catch (DataIntegrityViolationException e) {
-            throw new BusinessException(CardErrorCode.CARD_CONSTRAINT_CONFLICT);
-        }
+        Card savedCard = saveCard(card);
+        saveCardPerformance(createCardPerformance(userUuid, cardUser));
+
+        return CardApplicationResponse.from(savedCard);
     }
 
     private CardUser issueForExistingUser(CardUser cardUser) {
@@ -84,7 +88,7 @@ public class CardApplicationService {
         try {
             return cardUserRepository.saveAndFlush(cardUser);
         } catch (DataIntegrityViolationException e) {
-            throw new BusinessException(CardErrorCode.CARD_CONSTRAINT_CONFLICT);
+            throw new BusinessException(CardErrorCode.CARD_USER_CONSTRAINT_CONFLICT);
         }
     }
 
@@ -108,6 +112,38 @@ public class CardApplicationService {
                 .totalLimitAmount(DEFAULT_LIMIT_AMOUNT)
                 .availableLimitAmount(DEFAULT_LIMIT_AMOUNT)
                 .build();
+    }
+
+    private Card saveCard(Card card) {
+        try {
+            return cardRepository.saveAndFlush(card);
+        } catch (DataIntegrityViolationException e) {
+            throw new BusinessException(CardErrorCode.CARD_CONSTRAINT_CONFLICT);
+        }
+    }
+
+    private CardPerformance createCardPerformance(UUID userUuid, CardUser cardUser) {
+        return CardPerformance.builder()
+                .userUuid(userUuid)
+                .cardUserUuid(cardUser.getCardUserUuid())
+                .cardUser(cardUser)
+                .baseMonth(YearMonth.now().toString())
+                .previousMonthSpendAmount(DEFAULT_PERFORMANCE_AMOUNT)
+                .currentMonthSpendAmount(DEFAULT_PERFORMANCE_AMOUNT)
+                .rewardRate(DEFAULT_PERFORMANCE_AMOUNT)
+                .rewardPointAmount(DEFAULT_PERFORMANCE_AMOUNT)
+                .performanceStatus(null)
+                .calculatedAt(null)
+                .confirmedAt(null)
+                .build();
+    }
+
+    private void saveCardPerformance(CardPerformance cardPerformance) {
+        try {
+            cardPerformanceRepository.saveAndFlush(cardPerformance);
+        } catch (DataIntegrityViolationException e) {
+            throw new BusinessException(CardErrorCode.CARD_PERFORMANCE_CONSTRAINT_CONFLICT);
+        }
     }
 
     private String generateUniqueCardNo() {

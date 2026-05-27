@@ -207,8 +207,7 @@ class CardInfoServiceTest {
                 .currentMonthSpendAmount(currentMonthSpendAmount)
                 .rewardRate(BigDecimal.ZERO)
                 .rewardPointAmount(BigDecimal.ZERO)
-                .limitApplyStatus("NONE")
-                .performanceStatus("CONFIRMED")
+                .performanceStatus("1")
                 .build();
     }
 }

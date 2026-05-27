@@ -7,6 +7,7 @@ import com.woorifisa.won_card_core_server.domain.card.model.Gender;
 import com.woorifisa.won_card_core_server.domain.card.repository.CardRepository;
 import com.woorifisa.won_card_core_server.domain.card.repository.CardUserRepository;
 import com.woorifisa.won_card_core_server.domain.card.service.CardApplicationService;
+import com.woorifisa.won_card_core_server.domain.performance.repository.CardPerformanceRepository;
 import com.woorifisa.won_card_core_server.global.exception.handler.BusinessException;
 import com.woorifisa.won_card_core_server.global.security.TextEncryptor;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,11 +35,15 @@ class WonCardCoreServerApplicationTests {
     private CardUserRepository cardUserRepository;
 
     @Autowired
+    private CardPerformanceRepository cardPerformanceRepository;
+
+    @Autowired
     private TextEncryptor textEncryptor;
 
     @BeforeEach
     void setUp() {
         cardRepository.deleteAll();
+        cardPerformanceRepository.deleteAll();
         cardUserRepository.deleteAll();
     }
 
@@ -58,6 +63,7 @@ class WonCardCoreServerApplicationTests {
         assertThat(response.cardStatus()).isEqualTo("ACTIVE");
         assertThat(cardUserRepository.findByUserUuid(userUuid)).isPresent();
         assertThat(cardRepository.count()).isEqualTo(1);
+        assertThat(cardPerformanceRepository.count()).isEqualTo(1);
     }
 
     @Test
@@ -71,6 +77,7 @@ class WonCardCoreServerApplicationTests {
 
         assertThat(cardUserRepository.findByUserUuid(userUuid)).isEmpty();
         assertThat(cardRepository.count()).isZero();
+        assertThat(cardPerformanceRepository.count()).isZero();
     }
 
     @Test
@@ -84,6 +91,7 @@ class WonCardCoreServerApplicationTests {
                         assertThat(exception.getErrorCode()).isEqualTo(CardErrorCode.CARD_ALREADY_EXISTS));
 
         assertThat(cardRepository.count()).isEqualTo(1);
+        assertThat(cardPerformanceRepository.count()).isEqualTo(1);
     }
 
     @Test
@@ -98,6 +106,7 @@ class WonCardCoreServerApplicationTests {
 
         assertThat(cardUserRepository.count()).isEqualTo(1);
         assertThat(cardRepository.count()).isEqualTo(1);
+        assertThat(cardPerformanceRepository.count()).isEqualTo(1);
     }
 
     @Test
@@ -119,6 +128,7 @@ class WonCardCoreServerApplicationTests {
 
         assertThat(cardUserRepository.count()).isZero();
         assertThat(cardRepository.count()).isZero();
+        assertThat(cardPerformanceRepository.count()).isZero();
     }
 
     @Test

@@ -329,6 +329,7 @@ class RewardLedgerServiceTest {
         setField(ledger, "pointUuid", POINT_UUID);
         setField(ledger, "cardUserUuid", CARD_USER_UUID);
         setField(ledger, "performanceId", performanceId);
+        setField(ledger, "baseMonth", toBaseMonth(occurredAt));
         setField(ledger, "rewardProcessStatus", rewardProcessStatus);
         setField(ledger, "inAmount", inAmount);
         setField(ledger, "outAmount", outAmount);
@@ -374,6 +375,7 @@ class RewardLedgerServiceTest {
         setField(ledger, "pointLedgerId", pointLedgerId);
         setField(ledger, "pointUuid", POINT_UUID);
         setField(ledger, "cardUserUuid", CARD_USER_UUID);
+        setField(ledger, "baseMonth", toBaseMonth(occurredAt));
         setField(ledger, "rewardProcessStatus", rewardProcessStatus);
         setField(ledger, "inAmount", inAmount);
         setField(ledger, "outAmount", outAmount);
@@ -381,6 +383,10 @@ class RewardLedgerServiceTest {
         setField(ledger, "occurredAt", occurredAt);
 
         return ledger;
+    }
+
+    private String toBaseMonth(LocalDateTime occurredAt) {
+        return occurredAt.getYear() + "-" + String.format("%02d", occurredAt.getMonthValue());
     }
 
     private void setField(Object target, String fieldName, Object value) throws Exception {

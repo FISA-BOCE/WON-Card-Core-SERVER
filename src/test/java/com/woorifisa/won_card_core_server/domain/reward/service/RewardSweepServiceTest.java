@@ -99,7 +99,7 @@ class RewardSweepServiceTest {
         );
 
         // then
-        assertThat(exception.getErrorCode()).isEqualTo(RewardErrorCode.REWARD_LEDGER_NOT_FOUND);
+        assertThat(exception.getErrorCode()).isEqualTo(RewardErrorCode.INVALID_REWARD_LEDGER_TYPE);
         verify(cardPointLedgerRepository, never()).findByIdForUpdate(any());
         verify(cardPerformanceRepository, never()).findByPerformanceIdAndCardUserUuid(any(), any());
     }
@@ -114,7 +114,7 @@ class RewardSweepServiceTest {
         );
 
         // then
-        assertThat(exception.getErrorCode()).isEqualTo(RewardErrorCode.REWARD_LEDGER_NOT_FOUND);
+        assertThat(exception.getErrorCode()).isEqualTo(RewardErrorCode.INVALID_REWARD_LEDGER_TYPE);
         verify(cardPointLedgerRepository, never()).findByIdForUpdate(any());
         verify(cardPerformanceRepository, never()).findByPerformanceIdAndCardUserUuid(any(), any());
     }
@@ -302,6 +302,7 @@ class RewardSweepServiceTest {
             setField(ledger, "pointLedgerId", pointLedgerId);
             setField(ledger, "cardUserUuid", cardUserUuid);
             setField(ledger, "performanceId", performanceId);
+            setField(ledger, "baseMonth", "2026-05");
             setField(ledger, "rewardProcessStatus", rewardProcessStatus);
             setField(ledger, "sweepStatus", sweepStatus);
             setField(ledger, "inAmount", inAmount);

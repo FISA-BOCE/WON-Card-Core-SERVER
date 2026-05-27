@@ -16,7 +16,7 @@ public record RewardSweepRequestResponse(
         return new RewardSweepRequestResponse(
                 pointLedger.getPointLedgerId(),
                 pointLedger.getPerformanceId(),
-                performance.getBaseMonth(),
+                pointLedger.getBaseMonth(),
                 amount,
                 amount,
                 pointLedger.getSweepStatus().name()

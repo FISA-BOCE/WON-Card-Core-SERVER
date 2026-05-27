@@ -1,6 +1,7 @@
 package com.woorifisa.won_card_core_server.domain.reward.model;
 
 import com.woorifisa.won_card_core_server.domain.reward.model.enums.RewardProcessStatus;
+import com.woorifisa.won_card_core_server.domain.reward.model.enums.SweepStatus;
 import com.woorifisa.won_card_core_server.global.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -63,6 +64,10 @@ public class CardPointLedger extends BaseTimeEntity {
     @Column(name = "occurred_at", nullable = false)
     private LocalDateTime occurredAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "sweep_status", nullable = false, length = 30)
+    private SweepStatus sweepStatus = SweepStatus.NONE;
+
     public Long getDisplayPointAmount() {
         if (inAmount != null && inAmount.compareTo(BigDecimal.ZERO) > 0) {
             return inAmount.setScale(0, RoundingMode.DOWN).longValue();
@@ -77,5 +82,9 @@ public class CardPointLedger extends BaseTimeEntity {
 
     public String getBaseMonth() {
         return occurredAt.getYear() + "-" + String.format("%02d", occurredAt.getMonthValue());
+    }
+
+    public void markSweepRequested() {
+        this.sweepStatus = SweepStatus.REQUESTED;
     }
 }

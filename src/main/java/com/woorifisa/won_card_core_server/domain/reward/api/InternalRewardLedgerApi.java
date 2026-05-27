@@ -15,7 +15,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "Reward", description = "자동 투자 리워드 관련 API")
+@Tag(name = "Reward Internal API", description = "자동 투자 리워드 관련 API")
 public class InternalRewardLedgerApi {
 
     private final RewardLedgerService rewardLedgerService;

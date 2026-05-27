@@ -9,6 +9,7 @@ import com.woorifisa.won_card_core_server.domain.reward.exception.code.RewardErr
 import com.woorifisa.won_card_core_server.domain.reward.model.CardPointLedger;
 import com.woorifisa.won_card_core_server.domain.reward.model.enums.RewardProcessStatus;
 import com.woorifisa.won_card_core_server.domain.reward.repository.CardPointLedgerRepository;
+import com.woorifisa.won_card_core_server.domain.reward.service.validator.RewardLedgerValidator;
 import com.woorifisa.won_card_core_server.global.exception.handler.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,6 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.Year;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -31,6 +31,7 @@ public class RewardLedgerService {
 
     private final CardPointLedgerRepository cardPointLedgerRepository;
     private final CardPerformanceRepository cardPerformanceRepository;
+    private final RewardLedgerValidator rewardLedgerValidator;
 
     public RewardLedgerResponse getRewardLedger(UUID cardUserUuid, String type) {
 
@@ -67,7 +68,7 @@ public class RewardLedgerService {
                 .orElseThrow(() -> new BusinessException(RewardErrorCode.REWARD_LEDGER_NOT_FOUND));
 
         // 본인 소유 리워드인지 확인
-        validateOwner(pointLedger, cardUserUuid);
+        rewardLedgerValidator.validateOwner(pointLedger, cardUserUuid);
 
         // 올바른 상태값인지 확인
         validateRewardProcessStatus(pointLedger);
@@ -118,12 +119,6 @@ public class RewardLedgerService {
         if (pointLedger.getRewardProcessStatus() == null
                 || pointLedger.getRewardProcessStatus().isAll()) {
             throw new BusinessException(RewardErrorCode.INVALID_REWARD_LEDGER_STATUS);
-        }
-    }
-
-    private void validateOwner(CardPointLedger pointLedger, UUID cardUserUuid) {
-        if (!Objects.equals(pointLedger.getCardUserUuid(), cardUserUuid)) {
-            throw new BusinessException(RewardErrorCode.REWARD_LEDGER_FORBIDDEN);
         }
     }
 

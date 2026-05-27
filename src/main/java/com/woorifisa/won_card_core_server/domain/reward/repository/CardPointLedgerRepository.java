@@ -2,13 +2,16 @@ package com.woorifisa.won_card_core_server.domain.reward.repository;
 
 import com.woorifisa.won_card_core_server.domain.reward.model.CardPointLedger;
 import com.woorifisa.won_card_core_server.domain.reward.model.enums.RewardProcessStatus;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface CardPointLedgerRepository extends JpaRepository<CardPointLedger, Long> {
@@ -60,4 +63,11 @@ public interface CardPointLedgerRepository extends JpaRepository<CardPointLedger
             @Param("endDateTime") LocalDateTime endDateTime
     );
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+            select l
+            from CardPointLedger l
+            where l.pointLedgerId = :pointLedgerId
+            """)
+    Optional<CardPointLedger> findByIdForUpdate(@Param("pointLedgerId") Long pointLedgerId);
 }

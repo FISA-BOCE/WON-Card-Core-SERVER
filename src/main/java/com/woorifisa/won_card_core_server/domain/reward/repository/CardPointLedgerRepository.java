@@ -2,6 +2,7 @@ package com.woorifisa.won_card_core_server.domain.reward.repository;
 
 import com.woorifisa.won_card_core_server.domain.reward.model.CardPointLedger;
 import com.woorifisa.won_card_core_server.domain.reward.model.enums.RewardProcessStatus;
+import com.woorifisa.won_card_core_server.domain.reward.model.enums.SweepStatus;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -70,4 +71,21 @@ public interface CardPointLedgerRepository extends JpaRepository<CardPointLedger
             where l.pointLedgerId = :pointLedgerId
             """)
     Optional<CardPointLedger> findByIdForUpdate(@Param("pointLedgerId") Long pointLedgerId);
+
+    @Query("""
+            select l
+            from CardPointLedger l
+            where l.baseMonth = :baseMonth
+              and l.rewardProcessStatus = :rewardProcessStatus
+              and l.sweepStatus = :sweepStatus
+              and l.inAmount is not null
+              and l.inAmount > 0
+            order by l.pointLedgerId asc
+            """)
+    List<CardPointLedger> findSweepCandidates(
+            @Param("baseMonth") String baseMonth,
+            @Param("rewardProcessStatus") RewardProcessStatus rewardProcessStatus,
+            @Param("sweepStatus") SweepStatus sweepStatus
+    );
+
 }

@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 public enum RewardErrorCode implements ErrorCode {
 
     INVALID_REWARD_LEDGER_TYPE(HttpStatus.BAD_REQUEST, "REWARD_400_001", "유효하지 않은 type 값입니다."),
+    INVALID_REWARD_BASE_MONTH(HttpStatus.BAD_REQUEST, "REWARD_400_002", "유효하지 않은 기준월입니다."),
 
     REWARD_LEDGER_FORBIDDEN(HttpStatus.FORBIDDEN, "REWARD_403_001", "본인의 리워드 내역이 아닙니다."),
 

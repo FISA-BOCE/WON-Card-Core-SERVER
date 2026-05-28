@@ -20,8 +20,8 @@ public enum SuccessStatus {
 
     // 스윕
     REWARD_SWEEP_REQUESTED(HttpStatus.OK, "SWEEP_200_001", "스윕 요청 선점이 완료되었습니다."),
-    REWARD_SWEEP_CANDIDATES_FOUND(HttpStatus.OK, "SWEEP_200_002", "스윕 후보 리워드 원장 조회가 완료되었습니다.");
-
+    REWARD_SWEEP_CANDIDATES_FOUND(HttpStatus.OK, "SWEEP_200_002", "스윕 후보 리워드 원장 조회가 완료되었습니다."),
+    REWARD_SWEEP_REQUEST_CANCELLED(HttpStatus.OK, "REWARD_200_003", "리워드 원장 스윕 요청이 취소되었습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

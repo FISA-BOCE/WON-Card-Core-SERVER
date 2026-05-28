@@ -1,5 +1,6 @@
 package com.woorifisa.won_card_core_server.domain.reward.api;
 
+import com.woorifisa.won_card_core_server.domain.reward.dto.response.RewardSweepCancelResponse;
 import com.woorifisa.won_card_core_server.domain.reward.dto.response.RewardSweepCandidateResponse;
 import com.woorifisa.won_card_core_server.domain.reward.dto.response.RewardSweepRequestResponse;
 import com.woorifisa.won_card_core_server.domain.reward.service.RewardSweepService;
@@ -36,6 +37,23 @@ public class InternalRewardSweepApi {
         return ResponseEntity
                 .status(SuccessStatus.REWARD_SWEEP_REQUESTED.getHttpStatus())
                 .body(ApiResponse.of(SuccessStatus.REWARD_SWEEP_REQUESTED, response));
+    }
+
+    @Operation(
+            summary = "리워드 원장 스윕 요청 선점 취소",
+            description = "채널계 보장 트랜잭션 처리를 위해 REQUESTED 상태로 선점된 스윕 요청을 NONE 상태로 되돌립니다."
+    )
+    @PostMapping("/ledger/{pointLedgerId}/sweep-request/cancel")
+    public ResponseEntity<ApiResponse<RewardSweepCancelResponse>> cancelSweepRequest(
+            @RequestHeader("X-Card-User-UUID") UUID cardUserUuid,
+            @PathVariable Long pointLedgerId
+    ) {
+        RewardSweepCancelResponse response =
+                rewardSweepService.cancelSweepRequest(cardUserUuid, pointLedgerId);
+
+        return ResponseEntity
+                .status(SuccessStatus.REWARD_SWEEP_REQUEST_CANCELLED.getHttpStatus())
+                .body(ApiResponse.of(SuccessStatus.REWARD_SWEEP_REQUEST_CANCELLED, response));
     }
 
     @Operation(

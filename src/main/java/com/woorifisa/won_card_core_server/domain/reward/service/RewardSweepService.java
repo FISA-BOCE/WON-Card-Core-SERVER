@@ -3,6 +3,7 @@ package com.woorifisa.won_card_core_server.domain.reward.service;
 import com.woorifisa.won_card_core_server.domain.performance.exception.code.CardPerformanceErrorCode;
 import com.woorifisa.won_card_core_server.domain.performance.model.CardPerformance;
 import com.woorifisa.won_card_core_server.domain.performance.repository.CardPerformanceRepository;
+import com.woorifisa.won_card_core_server.domain.reward.dto.response.RewardSweepCancelResponse;
 import com.woorifisa.won_card_core_server.domain.reward.dto.response.RewardSweepCandidateResponse;
 import com.woorifisa.won_card_core_server.domain.reward.dto.response.RewardSweepRequestResponse;
 import com.woorifisa.won_card_core_server.domain.reward.exception.code.RewardErrorCode;
@@ -78,6 +79,29 @@ public class RewardSweepService {
 
         return new RewardSweepCandidateResponse(baseMonth, candidates);
     }
+
+    @Transactional
+    public RewardSweepCancelResponse cancelSweepRequest(UUID cardUserUuid, Long pointLedgerId) {
+        rewardLedgerValidator.validateRequired(cardUserUuid, pointLedgerId);
+
+        CardPointLedger pointLedger = cardPointLedgerRepository.findByIdForUpdate(pointLedgerId)
+                .orElseThrow(() -> new BusinessException(RewardErrorCode.REWARD_LEDGER_NOT_FOUND));
+
+        rewardLedgerValidator.validateOwner(pointLedger, cardUserUuid);
+
+        if (pointLedger.getSweepStatus() == SweepStatus.NONE) {
+            return RewardSweepCancelResponse.from(pointLedger);
+        }
+
+        if (pointLedger.getSweepStatus() != SweepStatus.REQUESTED) {
+            throw new BusinessException(RewardErrorCode.REWARD_SWEEP_CANCEL_NOT_ALLOWED);
+        }
+
+        pointLedger.cancelSweepRequested();
+
+        return RewardSweepCancelResponse.from(pointLedger);
+    }
+
 
     private void validateBaseMonth(String baseMonth) {
         if (baseMonth == null || baseMonth.isBlank() || !baseMonth.matches("\\d{4}-\\d{2}")) {

@@ -353,8 +353,7 @@ class RewardLedgerServiceTest {
         setField(performance, "currentMonthSpendAmount", BigDecimal.valueOf(1245000));
         setField(performance, "rewardRate", rewardRate);
         setField(performance, "rewardPointAmount", BigDecimal.valueOf(12450));
-        setField(performance, "limitApplyStatus", "NONE");
-        setField(performance, "performanceStatus", "CONFIRMED");
+        setField(performance, "performanceStatus", "1");
         setField(performance, "calculatedAt", LocalDateTime.of(2026, 5, 7, 14, 0));
         setField(performance, "confirmedAt", LocalDateTime.of(2026, 5, 7, 14, 10));
 

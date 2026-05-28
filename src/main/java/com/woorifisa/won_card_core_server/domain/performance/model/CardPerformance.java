@@ -19,6 +19,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Check;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -28,6 +29,7 @@ import java.util.UUID;
 
 @Entity
 @Getter
+@Check(constraints = "performance_status IN ('1', '2', '3')")
 @Table(
         name = "card_performance",
         uniqueConstraints = {
@@ -79,10 +81,7 @@ public class CardPerformance extends BaseTimeEntity {
     @Column(name = "reward_point_amount", nullable = false, precision = 18, scale = 4)
     private BigDecimal rewardPointAmount = BigDecimal.ZERO;
 
-    @Column(name = "limit_apply_status", nullable = false, length = 30)
-    private String limitApplyStatus;
-
-    @Column(name = "performance_status", nullable = false, length = 30)
+    @Column(name = "performance_status", columnDefinition = "CHAR(1)")
     private String performanceStatus;
 
     @Column(name = "calculated_at")

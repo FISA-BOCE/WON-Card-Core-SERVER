@@ -104,11 +104,10 @@ public class RewardSweepService {
 
 
     private void validateBaseMonth(String baseMonth) {
-        if (baseMonth == null || baseMonth.isBlank() || !baseMonth.matches("\\d{4}-\\d{2}")) {
+        if (baseMonth == null || baseMonth.isBlank() || !baseMonth.matches("\\d{4}-(0[1-9]|1[0-2])")) {
             throw new BusinessException(RewardErrorCode.INVALID_REWARD_BASE_MONTH);
         }
     }
-
 
     private CardPerformance getPerformance(CardPointLedger pointLedger) {
         Long performanceId = pointLedger.getPerformanceId();

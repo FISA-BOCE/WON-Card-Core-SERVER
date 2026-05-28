@@ -25,6 +25,7 @@ public class SpendSummaryService {
     private static final Long FIRST_PERFORMANCE_MIN_AMOUNT = 0L;
     private static final Long SECOND_PERFORMANCE_MIN_AMOUNT = 500_000L;
     private static final Long THIRD_PERFORMANCE_MIN_AMOUNT = 1_500_000L;
+    private static final Long MIN_REWARD_POINT_LIMIT_AMOUNT = 0L;
     private static final Long MAX_REWARD_POINT_LIMIT_AMOUNT = 40_000L;
 
     private static final String FIRST_PERFORMANCE_STATUS = "1";
@@ -125,7 +126,10 @@ public class SpendSummaryService {
                 .divide(PERCENT_DIVISOR, 0, RoundingMode.DOWN)
                 .longValue();
 
-        return Math.min(expectedRewardAmount, MAX_REWARD_POINT_LIMIT_AMOUNT);
+        return Math.max(
+                MIN_REWARD_POINT_LIMIT_AMOUNT,
+                Math.min(expectedRewardAmount, MAX_REWARD_POINT_LIMIT_AMOUNT)
+        );
     }
 
     private Long toLong(BigDecimal amount) {

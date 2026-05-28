@@ -13,7 +13,7 @@ public class RewardLedgerValidator {
 
     public void validateRequired(UUID cardUserUuid, Long pointLedgerId) {
         if (cardUserUuid == null || pointLedgerId == null) {
-            throw new BusinessException(RewardErrorCode.REWARD_LEDGER_NOT_FOUND);
+            throw new BusinessException(RewardErrorCode.INVALID_REWARD_LEDGER_TYPE);
         }
     }
 

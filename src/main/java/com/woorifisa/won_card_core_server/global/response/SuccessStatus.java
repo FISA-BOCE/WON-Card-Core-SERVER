@@ -18,7 +18,11 @@ public enum SuccessStatus {
     // 리워드
     REWARD_LEDGER_FOUND(HttpStatus.OK, "REWARD_200_001", "리워드 내역 조회가 완료되었습니다."),
     REWARD_LEDGER_DETAIL_FOUND(HttpStatus.OK, "REWARD_200_002", "상세 리워드 내역 조회가 완료되었습니다."),
-    REWARD_SWEEP_REQUESTED(HttpStatus.OK, "REWARD_200_003", "스윕 요청 선점이 완료되었습니다.");
+
+    // 스윕
+    REWARD_SWEEP_REQUESTED(HttpStatus.OK, "SWEEP_200_001", "스윕 요청 선점이 완료되었습니다."),
+    REWARD_SWEEP_CANDIDATES_FOUND(HttpStatus.OK, "SWEEP_200_002", "스윕 후보 리워드 원장 조회가 완료되었습니다."),
+    REWARD_SWEEP_REQUEST_CANCELLED(HttpStatus.OK, "SWEEP_200_003", "리워드 원장 스윕 요청이 취소되었습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

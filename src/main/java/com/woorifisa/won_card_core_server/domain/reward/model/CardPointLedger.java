@@ -68,6 +68,9 @@ public class CardPointLedger extends BaseTimeEntity {
     @Column(name = "sweep_status", nullable = false, length = 30)
     private SweepStatus sweepStatus = SweepStatus.NONE;
 
+    @Column(name = "base_month", nullable = false, length = 7)
+    private String baseMonth;
+
     public Long getDisplayPointAmount() {
         if (inAmount != null && inAmount.compareTo(BigDecimal.ZERO) > 0) {
             return inAmount.setScale(0, RoundingMode.DOWN).longValue();
@@ -80,11 +83,13 @@ public class CardPointLedger extends BaseTimeEntity {
         return 0L;
     }
 
-    public String getBaseMonth() {
-        return occurredAt.getYear() + "-" + String.format("%02d", occurredAt.getMonthValue());
-    }
-
     public void markSweepRequested() {
         this.sweepStatus = SweepStatus.REQUESTED;
     }
+
+    public void cancelSweepRequested() {
+        this.sweepStatus = SweepStatus.NONE;
+        this.sweepRequestId = null;
+    }
+
 }

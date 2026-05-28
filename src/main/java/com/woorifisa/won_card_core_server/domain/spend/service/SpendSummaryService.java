@@ -7,6 +7,7 @@ import com.woorifisa.won_card_core_server.domain.performance.model.CardPerforman
 import com.woorifisa.won_card_core_server.domain.performance.repository.CardPerformanceRepository;
 import com.woorifisa.won_card_core_server.domain.spend.dto.response.CurrentSpendAmountResponse;
 import com.woorifisa.won_card_core_server.domain.spend.exception.code.SpendErrorCode;
+import com.woorifisa.won_card_core_server.global.exception.code.CommonErrorCode;
 import com.woorifisa.won_card_core_server.global.exception.handler.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -45,6 +46,10 @@ public class SpendSummaryService {
     private final CardPerformanceRepository cardPerformanceRepository;
 
     public CurrentSpendAmountResponse getSpendSummary(UUID userUuid) {
+        if (userUuid == null) {
+            throw new BusinessException(CommonErrorCode.INVALID_REQUEST);
+        }
+
         CardUser cardUser = cardUserRepository.findByUserUuid(userUuid)
                 .orElseThrow(() -> new BusinessException(SpendErrorCode.CARD_USER_NOT_FOUND));
 

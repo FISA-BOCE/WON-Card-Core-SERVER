@@ -3,6 +3,7 @@ package com.woorifisa.won_card_core_server.domain.spend.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 
 import com.woorifisa.won_card_core_server.domain.card.model.CardUser;
 import com.woorifisa.won_card_core_server.domain.card.model.CardUserStatus;
@@ -13,6 +14,7 @@ import com.woorifisa.won_card_core_server.domain.performance.model.CardPerforman
 import com.woorifisa.won_card_core_server.domain.performance.repository.CardPerformanceRepository;
 import com.woorifisa.won_card_core_server.domain.spend.dto.response.CurrentSpendAmountResponse;
 import com.woorifisa.won_card_core_server.domain.spend.exception.code.SpendErrorCode;
+import com.woorifisa.won_card_core_server.global.exception.code.CommonErrorCode;
 import com.woorifisa.won_card_core_server.global.exception.handler.BusinessException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -122,6 +124,19 @@ class SpendSummaryServiceTest {
         assertThat(response.expectedReward().expectedRewardAmount()).isEqualTo(expectedRewardAmount);
         assertThat(calculateExpectedCurrentPerformanceStatus(response.currentSpendAmount()))
                 .isEqualTo(expectedCurrentPerformanceStatus);
+    }
+
+    @Test
+    @DisplayName("userUuid가 null이면 잘못된 요청 예외를 던진다")
+    void getSpendSummaryWhenUserUuidNull() {
+        // when & then
+        assertThatThrownBy(() -> spendSummaryService.getSpendSummary(null))
+                .isInstanceOfSatisfying(BusinessException.class, exception ->
+                        assertThat(exception.getErrorCode()).isEqualTo(CommonErrorCode.INVALID_REQUEST));
+
+        then(cardUserRepository).shouldHaveNoInteractions();
+        then(cardRepository).shouldHaveNoInteractions();
+        then(cardPerformanceRepository).shouldHaveNoInteractions();
     }
 
     @Test

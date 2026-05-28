@@ -79,7 +79,7 @@ public interface CardPointLedgerRepository extends JpaRepository<CardPointLedger
               and l.rewardProcessStatus = :rewardProcessStatus
               and l.sweepStatus = :sweepStatus
               and l.inAmount is not null
-              and l.inAmount > 0
+              and l.inAmount >= 1
             order by l.pointLedgerId asc
             """)
     List<CardPointLedger> findSweepCandidates(

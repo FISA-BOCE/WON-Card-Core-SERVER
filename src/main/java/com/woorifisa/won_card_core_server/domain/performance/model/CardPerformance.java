@@ -79,10 +79,7 @@ public class CardPerformance extends BaseTimeEntity {
     @Column(name = "reward_point_amount", nullable = false, precision = 18, scale = 4)
     private BigDecimal rewardPointAmount = BigDecimal.ZERO;
 
-    @Column(name = "limit_apply_status", nullable = false, length = 30)
-    private String limitApplyStatus;
-
-    @Column(name = "performance_status", nullable = false, length = 30)
+    @Column(name = "performance_status", columnDefinition = "CHAR(1)")
     private String performanceStatus;
 
     @Column(name = "calculated_at")

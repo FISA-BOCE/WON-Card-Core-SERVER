@@ -3,6 +3,7 @@ package com.woorifisa.won_card_core_server.domain.reward.service;
 import com.woorifisa.won_card_core_server.domain.performance.exception.code.CardPerformanceErrorCode;
 import com.woorifisa.won_card_core_server.domain.performance.model.CardPerformance;
 import com.woorifisa.won_card_core_server.domain.performance.repository.CardPerformanceRepository;
+import com.woorifisa.won_card_core_server.domain.reward.dto.response.RewardSweepCancelResponse;
 import com.woorifisa.won_card_core_server.domain.reward.dto.response.RewardSweepCandidateResponse;
 import com.woorifisa.won_card_core_server.domain.reward.dto.response.RewardSweepRequestResponse;
 import com.woorifisa.won_card_core_server.domain.reward.exception.code.RewardErrorCode;
@@ -373,6 +374,174 @@ class RewardSweepServiceTest {
 
         assertThat(exception.getErrorCode())
                 .isEqualTo(RewardErrorCode.REWARD_SWEEP_AMOUNT_INVALID);
+    }
+
+    @Test
+    @DisplayName("보상 트랜잭션 테스트: REQUESTED 상태 원장이면 스윕 요청을 취소하고 NONE 상태를 반환한다")
+    void cancelSweepRequestSuccess() {
+        // given
+        CardPointLedger ledger = createLedger(
+                1L,
+                cardUserUuid,
+                10L,
+                RewardProcessStatus.EARN,
+                SweepStatus.REQUESTED,
+                BigDecimal.valueOf(12450),
+                BigDecimal.ZERO
+        );
+        setField(ledger, "sweepRequestId", 100L);
+
+        when(cardPointLedgerRepository.findByIdForUpdate(1L))
+                .thenReturn(Optional.of(ledger));
+
+        // when
+        RewardSweepCancelResponse response =
+                rewardSweepService.cancelSweepRequest(cardUserUuid, 1L);
+
+        // then
+        assertThat(ledger.getSweepStatus()).isEqualTo(SweepStatus.NONE);
+        assertThat(ledger.getSweepRequestId()).isNull();
+        assertThat(response.pointLedgerId()).isEqualTo(1L);
+        assertThat(response.sweepStatus()).isEqualTo(SweepStatus.NONE.name());
+
+        verify(cardPointLedgerRepository).findByIdForUpdate(1L);
+    }
+
+    @Test
+    @DisplayName("이미 NONE 상태인 원장은 취소 요청을 멱등하게 성공 처리한다")
+    void cancelSweepRequestAlreadyNone() {
+        // given
+        CardPointLedger ledger = createLedger(
+                1L,
+                cardUserUuid,
+                10L,
+                RewardProcessStatus.EARN,
+                SweepStatus.NONE,
+                BigDecimal.valueOf(12450),
+                BigDecimal.ZERO
+        );
+
+        when(cardPointLedgerRepository.findByIdForUpdate(1L))
+                .thenReturn(Optional.of(ledger));
+
+        // when
+        RewardSweepCancelResponse response =
+                rewardSweepService.cancelSweepRequest(cardUserUuid, 1L);
+
+        // then
+        assertThat(ledger.getSweepStatus()).isEqualTo(SweepStatus.NONE);
+        assertThat(response.sweepStatus()).isEqualTo(SweepStatus.NONE.name());
+    }
+
+    @Test
+    @DisplayName("COMPLETED 상태 원장은 스윕 요청을 취소할 수 없다")
+    void cancelSweepRequestCompletedNotAllowed() {
+        // given
+        CardPointLedger ledger = createLedger(
+                1L,
+                cardUserUuid,
+                10L,
+                RewardProcessStatus.EARN,
+                SweepStatus.COMPLETED,
+                BigDecimal.valueOf(12450),
+                BigDecimal.ZERO
+        );
+
+        when(cardPointLedgerRepository.findByIdForUpdate(1L))
+                .thenReturn(Optional.of(ledger));
+
+        // when
+        BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> rewardSweepService.cancelSweepRequest(cardUserUuid, 1L)
+        );
+
+        // then
+        assertThat(exception.getErrorCode())
+                .isEqualTo(RewardErrorCode.REWARD_SWEEP_CANCEL_NOT_ALLOWED);
+        assertThat(ledger.getSweepStatus()).isEqualTo(SweepStatus.COMPLETED);
+    }
+
+    @Test
+    @DisplayName("FAILED 상태 원장은 스윕 요청을 취소할 수 없다")
+    void cancelSweepRequestFailedNotAllowed() {
+        // given
+        CardPointLedger ledger = createLedger(
+                1L,
+                cardUserUuid,
+                10L,
+                RewardProcessStatus.EARN,
+                SweepStatus.FAILED,
+                BigDecimal.valueOf(12450),
+                BigDecimal.ZERO
+        );
+
+        when(cardPointLedgerRepository.findByIdForUpdate(1L))
+                .thenReturn(Optional.of(ledger));
+
+        // when
+        BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> rewardSweepService.cancelSweepRequest(cardUserUuid, 1L)
+        );
+
+        // then
+        assertThat(exception.getErrorCode())
+                .isEqualTo(RewardErrorCode.REWARD_SWEEP_CANCEL_NOT_ALLOWED);
+        assertThat(ledger.getSweepStatus()).isEqualTo(SweepStatus.FAILED);
+    }
+
+    @Test
+    @DisplayName("취소 요청에서 cardUserUuid가 null이면 예외가 발생한다")
+    void cancelSweepRequestCardUserUuidNull() {
+        BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> rewardSweepService.cancelSweepRequest(null, 1L)
+        );
+
+        assertThat(exception.getErrorCode()).isEqualTo(RewardErrorCode.INVALID_REWARD_LEDGER_TYPE);
+        verify(cardPointLedgerRepository, never()).findByIdForUpdate(any());
+    }
+
+    @Test
+    @DisplayName("취소 요청에서 원장이 없으면 REWARD_LEDGER_NOT_FOUND 예외가 발생한다")
+    void cancelSweepRequestLedgerNotFound() {
+        when(cardPointLedgerRepository.findByIdForUpdate(1L))
+                .thenReturn(Optional.empty());
+
+        BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> rewardSweepService.cancelSweepRequest(cardUserUuid, 1L)
+        );
+
+        assertThat(exception.getErrorCode()).isEqualTo(RewardErrorCode.REWARD_LEDGER_NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("취소 요청에서 다른 카드 사용자의 원장이면 REWARD_LEDGER_FORBIDDEN 예외가 발생한다")
+    void cancelSweepRequestForbidden() {
+        UUID otherCardUserUuid = UUID.fromString("99999999-9999-9999-9999-999999999999");
+
+        CardPointLedger ledger = createLedger(
+                1L,
+                otherCardUserUuid,
+                10L,
+                RewardProcessStatus.EARN,
+                SweepStatus.REQUESTED,
+                BigDecimal.valueOf(12450),
+                BigDecimal.ZERO
+        );
+
+        when(cardPointLedgerRepository.findByIdForUpdate(1L))
+                .thenReturn(Optional.of(ledger));
+
+        BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> rewardSweepService.cancelSweepRequest(cardUserUuid, 1L)
+        );
+
+        assertThat(exception.getErrorCode()).isEqualTo(RewardErrorCode.REWARD_LEDGER_FORBIDDEN);
+        assertThat(ledger.getSweepStatus()).isEqualTo(SweepStatus.REQUESTED);
     }
 
     private CardPointLedger createLedger(

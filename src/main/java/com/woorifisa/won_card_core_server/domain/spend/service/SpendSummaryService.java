@@ -15,12 +15,15 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.YearMonth;
+import java.time.ZoneId;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class SpendSummaryService {
+
+    private static final ZoneId SEOUL_ZONE_ID = ZoneId.of("Asia/Seoul");
 
     private static final Long FIRST_PERFORMANCE_MIN_AMOUNT = 0L;
     private static final Long SECOND_PERFORMANCE_MIN_AMOUNT = 500_000L;
@@ -50,7 +53,7 @@ public class SpendSummaryService {
             throw new BusinessException(SpendErrorCode.CARD_USER_NOT_FOUND);
         }
 
-        String baseMonth = YearMonth.now().toString();
+        String baseMonth = YearMonth.now(SEOUL_ZONE_ID).toString();
         CardPerformance performance = cardPerformanceRepository
                 .findByCardUserUuidAndBaseMonth(cardUserUuid, baseMonth)
                 .orElseThrow(() -> new BusinessException(SpendErrorCode.CURRENT_SPEND_AMOUNT_NOT_FOUND));

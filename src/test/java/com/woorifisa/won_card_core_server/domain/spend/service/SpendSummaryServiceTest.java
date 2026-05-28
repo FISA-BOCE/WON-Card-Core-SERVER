@@ -25,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.YearMonth;
+import java.time.ZoneId;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -35,6 +36,7 @@ class SpendSummaryServiceTest {
             UUID.fromString("0a31e4b1-2b1d-4b5e-8b82-0fb48e502111");
     private static final UUID CARD_USER_UUID =
             UUID.fromString("22222222-2222-2222-2222-222222222222");
+    private static final ZoneId SEOUL_ZONE_ID = ZoneId.of("Asia/Seoul");
 
     @Mock
     private CardUserRepository cardUserRepository;
@@ -52,7 +54,7 @@ class SpendSummaryServiceTest {
     @DisplayName("당월 이용 금액과 다음 구간, 예상 리워드를 계산한다")
     void getSpendSummary() {
         // given
-        String baseMonth = YearMonth.now().toString();
+        String baseMonth = YearMonth.now(SEOUL_ZONE_ID).toString();
         CardUser cardUser = newCardUser();
         CardPerformance performance = newCardPerformance(BigDecimal.valueOf(1_245_000));
 
@@ -98,7 +100,7 @@ class SpendSummaryServiceTest {
             Long expectedRewardAmount
     ) {
         // given
-        String baseMonth = YearMonth.now().toString();
+        String baseMonth = YearMonth.now(SEOUL_ZONE_ID).toString();
         CardUser cardUser = newCardUser();
         CardPerformance performance = newCardPerformance(BigDecimal.valueOf(currentSpendAmount));
 
@@ -153,7 +155,7 @@ class SpendSummaryServiceTest {
     @DisplayName("card_performance가 없으면 이용 금액 정보 없음 예외를 던진다")
     void getSpendSummaryWhenPerformanceNotFound() {
         // given
-        String baseMonth = YearMonth.now().toString();
+        String baseMonth = YearMonth.now(SEOUL_ZONE_ID).toString();
         CardUser cardUser = newCardUser();
 
         given(cardUserRepository.findByUserUuid(USER_UUID)).willReturn(Optional.of(cardUser));
@@ -188,7 +190,7 @@ class SpendSummaryServiceTest {
         return CardPerformance.builder()
                 .userUuid(USER_UUID)
                 .cardUserUuid(CARD_USER_UUID)
-                .baseMonth(YearMonth.now().toString())
+                .baseMonth(YearMonth.now(SEOUL_ZONE_ID).toString())
                 .previousMonthSpendAmount(BigDecimal.ZERO)
                 .currentMonthSpendAmount(currentMonthSpendAmount)
                 .rewardRate(BigDecimal.ZERO)

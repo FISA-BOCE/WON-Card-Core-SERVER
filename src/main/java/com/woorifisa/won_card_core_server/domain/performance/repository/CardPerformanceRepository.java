@@ -10,4 +10,6 @@ public interface CardPerformanceRepository extends JpaRepository<CardPerformance
     Optional<CardPerformance> findByPerformanceIdAndCardUserUuid(Long performanceId, UUID cardUserUuid);
 
     Optional<CardPerformance> findByCardUserUuidAndBaseMonth(UUID cardUserUuid, String baseMonth);
+
+    Optional<CardPerformance> findByUserUuidAndBaseMonth(UUID userUuid, String baseMonth);
 }

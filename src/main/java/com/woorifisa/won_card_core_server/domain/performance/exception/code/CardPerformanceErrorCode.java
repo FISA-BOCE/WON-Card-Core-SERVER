@@ -5,7 +5,10 @@ import org.springframework.http.HttpStatus;
 
 public enum CardPerformanceErrorCode implements ErrorCode {
 
-    PERFORMANCE_NOT_FOUND(HttpStatus.NOT_FOUND, "PERFORMANCE_404_001", "전월 실적 정보가 존재하지 않습니다.");
+    INVALID_PERFORMANCE_MONTH(HttpStatus.BAD_REQUEST, "CARD_400_001", "유효하지 않은 조회 월입니다."),
+    INVALID_PERFORMANCE_AMOUNT(HttpStatus.BAD_REQUEST, "CARD_400_002", "금액 형식이 올바르지 않습니다."),
+    PERFORMANCE_NOT_FOUND(HttpStatus.NOT_FOUND, "CARD_404_001", "실적 정보를 찾을 수 없습니다."),
+    CARD_USER_NOT_FOUND(HttpStatus.NOT_FOUND, "CARD_404_002", "고객 정보가 존재하지 않습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

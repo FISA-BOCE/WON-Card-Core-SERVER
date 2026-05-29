@@ -49,7 +49,7 @@ public class InternalRewardLedgerApi {
                 .body(ApiResponse.of(SuccessStatus.REWARD_LEDGER_DETAIL_FOUND, response));
     }
 
-    @Operation(summary = "전월 실적 조회", description = "사용자의 전월 실적과 리워드 지급 금액을 조회하는 API입니다.")
+    @Operation(summary = "당월 리워드 조회", description = "사용자의 전월 실적과 리워드 지급 금액을 조회하는 API입니다.")
     @GetMapping("/internal/cards/rewards/monthly")
     public ResponseEntity<ApiResponse<CurrentRewardsAmount>> getCurrentReward(
             @RequestHeader("X-User-UUID") UUID userUuid

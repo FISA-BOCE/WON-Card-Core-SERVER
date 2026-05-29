@@ -40,6 +40,7 @@ class InternalCardPerformanceApiTest {
         // given
         PreviousPerformanceResponse response = new PreviousPerformanceResponse(
                 "2026-05",
+                "2026-04",
                 "기준 충족",
                 820000L,
                 new PreviousPerformanceResponse.PerformanceDetail(820000L, 8200L)
@@ -59,6 +60,7 @@ class InternalCardPerformanceApiTest {
                 .andExpect(jsonPath("$.code").value("CARD_200_004"))
                 .andExpect(jsonPath("$.message").value("전월 실적 조회가 완료되었습니다."))
                 .andExpect(jsonPath("$.data.baseMonth").value("2026-05"))
+                .andExpect(jsonPath("$.data.previousMonth").value("2026-04"))
                 .andExpect(jsonPath("$.data.rewardStatus").value("기준 충족"))
                 .andExpect(jsonPath("$.data.previousMonthSpendAmount").value(820000))
                 .andExpect(jsonPath("$.data.detail.totalSpendAmount").value(820000))
@@ -93,6 +95,7 @@ class InternalCardPerformanceApiTest {
         // given
         PreviousPerformanceResponse response = new PreviousPerformanceResponse(
                 "2026-05",
+                "2026-04",
                 "기준 충족",
                 820000L,
                 new PreviousPerformanceResponse.PerformanceDetail(820000L, 8200L)

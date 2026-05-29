@@ -46,7 +46,11 @@ public class CardPerformanceService {
         CardPerformance performance = cardPerformanceRepository.findByUserUuidAndBaseMonth(userUuid, targetBaseMonth)
                 .orElseThrow(() -> new BusinessException(CardPerformanceErrorCode.PERFORMANCE_NOT_FOUND));
 
-        return PreviousPerformanceResponse.from(performance, getRewardStatus(performance));
+        return PreviousPerformanceResponse.from(
+                performance,
+                requestedPreviousMonth.toString(),
+                getRewardStatus(performance)
+        );
     }
 
     private void validateUserUuid(UUID userUuid) {

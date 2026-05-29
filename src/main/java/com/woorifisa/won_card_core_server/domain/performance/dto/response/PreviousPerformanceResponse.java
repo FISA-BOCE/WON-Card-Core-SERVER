@@ -7,6 +7,7 @@ import java.math.RoundingMode;
 
 public record PreviousPerformanceResponse(
         String baseMonth,
+        String previousMonth,
         String rewardStatus,
         Long previousMonthSpendAmount,
         PerformanceDetail detail
@@ -14,12 +15,14 @@ public record PreviousPerformanceResponse(
 
     public static PreviousPerformanceResponse from(
             CardPerformance performance,
+            String previousMonth,
             String rewardStatus
     ) {
         Long previousMonthSpendAmount = toLong(performance.getPreviousMonthSpendAmount());
 
         return new PreviousPerformanceResponse(
                 performance.getBaseMonth(),
+                previousMonth,
                 rewardStatus,
                 previousMonthSpendAmount,
                 new PerformanceDetail(

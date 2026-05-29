@@ -67,6 +67,7 @@ class CardPerformanceServiceTest {
 
         // then
         assertThat(response.baseMonth()).isEqualTo("2026-05");
+        assertThat(response.previousMonth()).isEqualTo("2026-04");
         assertThat(response.rewardStatus()).isEqualTo("기준 충족");
         assertThat(response.previousMonthSpendAmount()).isEqualTo(820000L);
         assertThat(response.detail().totalSpendAmount()).isEqualTo(820000L);
@@ -96,6 +97,7 @@ class CardPerformanceServiceTest {
 
         // then
         assertThat(response.rewardStatus()).isEqualTo("기준 미달");
+        assertThat(response.previousMonth()).isEqualTo("2026-04");
         assertThat(response.previousMonthSpendAmount()).isZero();
         assertThat(response.detail().rewardPointAmount()).isZero();
     }
@@ -123,6 +125,7 @@ class CardPerformanceServiceTest {
 
         // then
         assertThat(response.baseMonth()).isEqualTo(targetBaseMonth);
+        assertThat(response.previousMonth()).isEqualTo(previousMonth.toString());
         then(cardPerformanceRepository).should().findByUserUuidAndBaseMonth(USER_UUID, targetBaseMonth);
     }
 

@@ -64,7 +64,12 @@ public class CardPerformanceService {
     }
 
     private String getRewardStatus(CardPerformance performance) {
-        if (BigDecimal.ZERO.compareTo(performance.getPreviousMonthSpendAmount()) == 0) {
+        BigDecimal previousMonthSpendAmount = performance.getPreviousMonthSpendAmount();
+        if (previousMonthSpendAmount == null || previousMonthSpendAmount.compareTo(BigDecimal.ZERO) < 0) {
+            throw new BusinessException(CardPerformanceErrorCode.INVALID_PERFORMANCE_AMOUNT);
+        }
+
+        if (BigDecimal.ZERO.compareTo(previousMonthSpendAmount) == 0) {
             return REWARD_STATUS_NOT_SATISFIED;
         }
 

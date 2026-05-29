@@ -93,7 +93,7 @@ class InternalCardPerformanceApiTest {
         // given
         PreviousPerformanceResponse response = new PreviousPerformanceResponse(
                 "2026-05",
-                "湲곗? 異⑹”",
+                "기준 충족",
                 820000L,
                 new PreviousPerformanceResponse.PerformanceDetail(820000L, 8200L)
         );

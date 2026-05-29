@@ -168,6 +168,50 @@ class CardPerformanceServiceTest {
                                 .isEqualTo(CardPerformanceErrorCode.PERFORMANCE_NOT_FOUND));
     }
 
+    @Test
+    @DisplayName("전월 실적 금액이 null이면 금액 형식 오류 예외를 던진다")
+    void getPreviousPerformanceInvalidAmountWhenPreviousMonthSpendAmountNull() {
+        // given
+        CardUser cardUser = newCardUser();
+        CardPerformance performance = newCardPerformance(
+                "2026-05",
+                null,
+                BigDecimal.ZERO
+        );
+
+        given(cardUserRepository.findByUserUuid(USER_UUID)).willReturn(Optional.of(cardUser));
+        given(cardPerformanceRepository.findByUserUuidAndBaseMonth(USER_UUID, "2026-05"))
+                .willReturn(Optional.of(performance));
+
+        // when & then
+        assertThatThrownBy(() -> cardPerformanceService.getPreviousPerformance(USER_UUID, "2026-04"))
+                .isInstanceOfSatisfying(BusinessException.class, exception ->
+                        assertThat(exception.getErrorCode())
+                                .isEqualTo(CardPerformanceErrorCode.INVALID_PERFORMANCE_AMOUNT));
+    }
+
+    @Test
+    @DisplayName("전월 실적 금액이 음수이면 금액 형식 오류 예외를 던진다")
+    void getPreviousPerformanceInvalidAmountWhenPreviousMonthSpendAmountNegative() {
+        // given
+        CardUser cardUser = newCardUser();
+        CardPerformance performance = newCardPerformance(
+                "2026-05",
+                BigDecimal.valueOf(-1),
+                BigDecimal.ZERO
+        );
+
+        given(cardUserRepository.findByUserUuid(USER_UUID)).willReturn(Optional.of(cardUser));
+        given(cardPerformanceRepository.findByUserUuidAndBaseMonth(USER_UUID, "2026-05"))
+                .willReturn(Optional.of(performance));
+
+        // when & then
+        assertThatThrownBy(() -> cardPerformanceService.getPreviousPerformance(USER_UUID, "2026-04"))
+                .isInstanceOfSatisfying(BusinessException.class, exception ->
+                        assertThat(exception.getErrorCode())
+                                .isEqualTo(CardPerformanceErrorCode.INVALID_PERFORMANCE_AMOUNT));
+    }
+
     private CardUser newCardUser() {
         return CardUser.builder()
                 .cardUserUuid(CARD_USER_UUID)

@@ -14,11 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.YearMonth;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.time.format.ResolverStyle;
 import java.util.UUID;
-import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -26,52 +22,28 @@ import java.util.regex.Pattern;
 public class CardPerformanceService {
 
     private static final ZoneId SEOUL_ZONE_ID = ZoneId.of("Asia/Seoul");
-    private static final Pattern BASE_MONTH_PATTERN = Pattern.compile("\\d{4}-\\d{2}");
-    private static final DateTimeFormatter BASE_MONTH_FORMATTER =
-            DateTimeFormatter.ofPattern("uuuu-MM").withResolverStyle(ResolverStyle.STRICT);
     private static final String REWARD_STATUS_SATISFIED = "기준 충족";
     private static final String REWARD_STATUS_NOT_SATISFIED = "기준 미달";
 
     private final CardUserRepository cardUserRepository;
     private final CardPerformanceRepository cardPerformanceRepository;
 
-    public PreviousPerformanceResponse getPreviousPerformance(UUID userUuid, String previousMonth) {
+    public PreviousPerformanceResponse getPreviousPerformance(UUID userUuid) {
         validateUserUuid(userUuid);
-        YearMonth requestedPreviousMonth = parsePreviousMonth(previousMonth);
+        String baseMonth = YearMonth.now(SEOUL_ZONE_ID).toString();
 
         cardUserRepository.findByUserUuid(userUuid)
                 .orElseThrow(() -> new BusinessException(CardPerformanceErrorCode.CARD_USER_NOT_FOUND));
 
-        String targetBaseMonth = requestedPreviousMonth.plusMonths(1).toString();
-        CardPerformance performance = cardPerformanceRepository.findByUserUuidAndBaseMonth(userUuid, targetBaseMonth)
+        CardPerformance performance = cardPerformanceRepository.findByUserUuidAndBaseMonth(userUuid, baseMonth)
                 .orElseThrow(() -> new BusinessException(CardPerformanceErrorCode.PERFORMANCE_NOT_FOUND));
 
-        return PreviousPerformanceResponse.from(
-                performance,
-                requestedPreviousMonth.toString(),
-                getRewardStatus(performance)
-        );
+        return PreviousPerformanceResponse.from(performance, getRewardStatus(performance));
     }
 
     private void validateUserUuid(UUID userUuid) {
         if (userUuid == null) {
             throw new BusinessException(CommonErrorCode.INVALID_REQUEST);
-        }
-    }
-
-    private YearMonth parsePreviousMonth(String previousMonth) {
-        if (previousMonth == null) {
-            return YearMonth.now(SEOUL_ZONE_ID).minusMonths(1);
-        }
-
-        if (!BASE_MONTH_PATTERN.matcher(previousMonth).matches()) {
-            throw new BusinessException(CardPerformanceErrorCode.INVALID_PERFORMANCE_MONTH);
-        }
-
-        try {
-            return YearMonth.parse(previousMonth, BASE_MONTH_FORMATTER);
-        } catch (DateTimeParseException e) {
-            throw new BusinessException(CardPerformanceErrorCode.INVALID_PERFORMANCE_MONTH);
         }
     }
 

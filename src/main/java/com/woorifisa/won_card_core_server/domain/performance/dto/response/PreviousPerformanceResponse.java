@@ -7,28 +7,26 @@ import java.math.RoundingMode;
 
 public record PreviousPerformanceResponse(
         String baseMonth,
-        String previousMonth,
         String rewardStatus,
         Long previousMonthSpendAmount,
-        PerformanceDetail detail
+        Long rewardPointAmount,
+        BigDecimal rewardRate,
+        String performanceStatus
 ) {
 
     public static PreviousPerformanceResponse from(
             CardPerformance performance,
-            String previousMonth,
             String rewardStatus
     ) {
         Long previousMonthSpendAmount = toLong(performance.getPreviousMonthSpendAmount());
 
         return new PreviousPerformanceResponse(
                 performance.getBaseMonth(),
-                previousMonth,
                 rewardStatus,
                 previousMonthSpendAmount,
-                new PerformanceDetail(
-                        previousMonthSpendAmount,
-                        toLong(performance.getRewardPointAmount())
-                )
+                toLong(performance.getRewardPointAmount()),
+                performance.getRewardRate(),
+                performance.getPerformanceStatus()
         );
     }
 
@@ -40,9 +38,4 @@ public record PreviousPerformanceResponse(
         return amount.setScale(0, RoundingMode.DOWN).longValue();
     }
 
-    public record PerformanceDetail(
-            Long totalSpendAmount,
-            Long rewardPointAmount
-    ) {
-    }
 }

@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record CardApplicationResponse(
+        UUID cardUserUuid,
         UUID cardUuid,
         String cardNoDisplay,
         LocalDateTime issuedAt,
@@ -14,6 +15,7 @@ public record CardApplicationResponse(
 
     public static CardApplicationResponse from(Card card) {
         return new CardApplicationResponse(
+                card.getCardUser().getCardUserUuid(),
                 card.getCardUuid(),
                 card.getCardNoDisplay(),
                 card.getIssuedAt(),

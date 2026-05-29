@@ -13,6 +13,7 @@ import com.woorifisa.won_card_core_server.domain.performance.dto.response.Previo
 import com.woorifisa.won_card_core_server.domain.performance.exception.code.CardPerformanceErrorCode;
 import com.woorifisa.won_card_core_server.domain.performance.model.CardPerformance;
 import com.woorifisa.won_card_core_server.domain.performance.repository.CardPerformanceRepository;
+import com.woorifisa.won_card_core_server.global.exception.code.CommonErrorCode;
 import com.woorifisa.won_card_core_server.global.exception.handler.BusinessException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -149,6 +150,19 @@ class CardPerformanceServiceTest {
                 .isInstanceOfSatisfying(BusinessException.class, exception ->
                         assertThat(exception.getErrorCode())
                                 .isEqualTo(CardPerformanceErrorCode.CARD_USER_NOT_FOUND));
+    }
+
+    @Test
+    @DisplayName("userUuid가 null이면 요청 형식 오류 예외를 던지고 저장소를 호출하지 않는다")
+    void getPreviousPerformanceUserUuidNull() {
+        // when & then
+        assertThatThrownBy(() -> cardPerformanceService.getPreviousPerformance(null, "2026-04"))
+                .isInstanceOfSatisfying(BusinessException.class, exception ->
+                        assertThat(exception.getErrorCode())
+                                .isEqualTo(CommonErrorCode.INVALID_REQUEST));
+
+        then(cardUserRepository).shouldHaveNoInteractions();
+        then(cardPerformanceRepository).shouldHaveNoInteractions();
     }
 
     @Test

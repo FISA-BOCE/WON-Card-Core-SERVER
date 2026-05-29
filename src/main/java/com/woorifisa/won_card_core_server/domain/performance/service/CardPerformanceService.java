@@ -5,6 +5,7 @@ import com.woorifisa.won_card_core_server.domain.performance.dto.response.Previo
 import com.woorifisa.won_card_core_server.domain.performance.exception.code.CardPerformanceErrorCode;
 import com.woorifisa.won_card_core_server.domain.performance.model.CardPerformance;
 import com.woorifisa.won_card_core_server.domain.performance.repository.CardPerformanceRepository;
+import com.woorifisa.won_card_core_server.global.exception.code.CommonErrorCode;
 import com.woorifisa.won_card_core_server.global.exception.handler.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -35,6 +36,7 @@ public class CardPerformanceService {
     private final CardPerformanceRepository cardPerformanceRepository;
 
     public PreviousPerformanceResponse getPreviousPerformance(UUID userUuid, String previousMonth) {
+        validateUserUuid(userUuid);
         YearMonth requestedPreviousMonth = parsePreviousMonth(previousMonth);
 
         cardUserRepository.findByUserUuid(userUuid)
@@ -45,6 +47,12 @@ public class CardPerformanceService {
                 .orElseThrow(() -> new BusinessException(CardPerformanceErrorCode.PERFORMANCE_NOT_FOUND));
 
         return PreviousPerformanceResponse.from(performance, getRewardStatus(performance));
+    }
+
+    private void validateUserUuid(UUID userUuid) {
+        if (userUuid == null) {
+            throw new BusinessException(CommonErrorCode.INVALID_REQUEST);
+        }
     }
 
     private YearMonth parsePreviousMonth(String previousMonth) {

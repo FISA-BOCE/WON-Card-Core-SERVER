@@ -7,10 +7,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.woorifisa.won_card_core_server.domain.reward.dto.response.CurrentRewardsAmount;
 import com.woorifisa.won_card_core_server.domain.reward.dto.response.RewardLedgerDetailResponse;
 import com.woorifisa.won_card_core_server.domain.reward.dto.response.RewardLedgerResponse;
+import com.woorifisa.won_card_core_server.domain.reward.service.RewardGetService;
 import com.woorifisa.won_card_core_server.domain.reward.service.RewardLedgerService;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -29,12 +32,17 @@ class InternalRewardLedgerApiTest {
 
     private static final UUID CARD_USER_UUID =
             UUID.fromString("22222222-2222-2222-2222-222222222222");
+    private static final UUID USER_UUID =
+            UUID.fromString("11111111-1111-1111-1111-111111111111");
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockitoBean
     private RewardLedgerService rewardLedgerService;
+
+    @MockitoBean
+    private RewardGetService rewardGetService;
 
     @Test
     @DisplayName("내부 리워드 내역 조회 API를 호출한다")
@@ -140,5 +148,41 @@ class InternalRewardLedgerApiTest {
                 .andExpect(jsonPath("$.data.ledgers").isArray());
 
         then(rewardLedgerService).should().getRewardLedger(CARD_USER_UUID, null);
+    }
+
+    @Test
+    @DisplayName("monthly reward API returns current reward amount")
+    void getCurrentReward() throws Exception {
+        // given
+        CurrentRewardsAmount response = new CurrentRewardsAmount(
+                "2026-05",
+                "SATISFIED",
+                820000L,
+                12450L,
+                new BigDecimal("0.015"),
+                "COMPLETE"
+        );
+
+        given(rewardGetService.getCurrentReward(eq(USER_UUID)))
+                .willReturn(response);
+
+        // when & then
+        mockMvc.perform(
+                        get("/internal/cards/rewards/monthly")
+                                .header("X-User-UUID", USER_UUID.toString())
+                                .header("X-Service-ID", "WON-CARD-CHANNEL")
+                                .header("X-Transaction-ID", "TX-20260512-RWD04")
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.code").value("CARD_200_004"))
+                .andExpect(jsonPath("$.data.baseMonth").value("2026-05"))
+                .andExpect(jsonPath("$.data.rewardStatus").value("SATISFIED"))
+                .andExpect(jsonPath("$.data.previousMonthSpendAmount").value(820000))
+                .andExpect(jsonPath("$.data.rewardPointAmount").value(12450))
+                .andExpect(jsonPath("$.data.rewardRate").value(0.015))
+                .andExpect(jsonPath("$.data.performanceStatus").value("COMPLETE"));
+
+        then(rewardGetService).should().getCurrentReward(USER_UUID);
     }
 }

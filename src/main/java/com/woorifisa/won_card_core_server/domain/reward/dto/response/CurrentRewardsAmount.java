@@ -1,13 +1,14 @@
 package com.woorifisa.won_card_core_server.domain.reward.dto.response;
 
 import com.woorifisa.won_card_core_server.domain.performance.model.CardPerformance;
+import com.woorifisa.won_card_core_server.domain.reward.model.enums.RewardStatus;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 public record CurrentRewardsAmount(
         String baseMonth,
-        String rewardStatus,
+        RewardStatus rewardStatus,
         Long previousMonthSpendAmount,
         Long rewardPointAmount,
         BigDecimal rewardRate,
@@ -16,7 +17,7 @@ public record CurrentRewardsAmount(
 
     public static CurrentRewardsAmount from(
             CardPerformance performance,
-            String rewardStatus
+            RewardStatus rewardStatus
     ) {
         Long previousMonthSpendAmount = toLong(performance.getPreviousMonthSpendAmount());
 

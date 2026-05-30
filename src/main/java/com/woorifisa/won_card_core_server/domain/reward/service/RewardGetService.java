@@ -1,10 +1,11 @@
 package com.woorifisa.won_card_core_server.domain.reward.service;
 
 import com.woorifisa.won_card_core_server.domain.card.repository.CardUserRepository;
-import com.woorifisa.won_card_core_server.domain.reward.dto.response.CurrentRewardsAmount;
-import com.woorifisa.won_card_core_server.domain.reward.exception.code.RewardErrorCode;
 import com.woorifisa.won_card_core_server.domain.performance.model.CardPerformance;
 import com.woorifisa.won_card_core_server.domain.performance.repository.CardPerformanceRepository;
+import com.woorifisa.won_card_core_server.domain.reward.dto.response.CurrentRewardsAmount;
+import com.woorifisa.won_card_core_server.domain.reward.exception.code.RewardErrorCode;
+import com.woorifisa.won_card_core_server.domain.reward.model.enums.RewardStatus;
 import com.woorifisa.won_card_core_server.global.exception.code.CommonErrorCode;
 import com.woorifisa.won_card_core_server.global.exception.handler.BusinessException;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +23,6 @@ import java.util.UUID;
 public class RewardGetService {
 
     private static final ZoneId SEOUL_ZONE_ID = ZoneId.of("Asia/Seoul");
-    private static final String REWARD_STATUS_SATISFIED = "기준 충족";
-    private static final String REWARD_STATUS_NOT_SATISFIED = "기준 미달";
 
     private final CardUserRepository cardUserRepository;
     private final CardPerformanceRepository cardPerformanceRepository;
@@ -47,16 +46,16 @@ public class RewardGetService {
         }
     }
 
-    private String getRewardStatus(CardPerformance performance) {
+    private RewardStatus getRewardStatus(CardPerformance performance) {
         BigDecimal previousMonthSpendAmount = performance.getPreviousMonthSpendAmount();
         if (previousMonthSpendAmount == null || previousMonthSpendAmount.compareTo(BigDecimal.ZERO) < 0) {
             throw new BusinessException(RewardErrorCode.INVALID_PERFORMANCE_AMOUNT);
         }
 
         if (BigDecimal.ZERO.compareTo(previousMonthSpendAmount) == 0) {
-            return REWARD_STATUS_NOT_SATISFIED;
+            return RewardStatus.NOT_SATISFIED;
         }
 
-        return REWARD_STATUS_SATISFIED;
+        return RewardStatus.SATISFIED;
     }
 }

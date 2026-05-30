@@ -8,6 +8,9 @@ public enum RewardErrorCode implements ErrorCode {
     INVALID_REWARD_LEDGER_TYPE(HttpStatus.BAD_REQUEST, "REWARD_400_001", "유효하지 않은 type 값입니다."),
     INVALID_REWARD_BASE_MONTH(HttpStatus.BAD_REQUEST, "REWARD_400_002", "유효하지 않은 기준월입니다."),
 
+    INVALID_PERFORMANCE_AMOUNT(HttpStatus.BAD_REQUEST, "CARD_400_002", "금액 형식이 올바르지 않습니다."),
+    CARD_USER_NOT_FOUND(HttpStatus.NOT_FOUND, "CARD_404_002", "고객 정보가 존재하지 않습니다."),
+
     REWARD_LEDGER_FORBIDDEN(HttpStatus.FORBIDDEN, "REWARD_403_001", "본인의 리워드 내역이 아닙니다."),
 
     REWARD_LEDGER_NOT_FOUND(HttpStatus.NOT_FOUND, "REWARD_404_001", "리워드 내역을 찾을 수 없습니다."),

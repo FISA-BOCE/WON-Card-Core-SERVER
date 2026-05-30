@@ -14,7 +14,6 @@ public enum SuccessStatus {
     CARD_INFO_FOUND(HttpStatus.OK, "CARD_200_001", "카드 정보 조회가 완료되었습니다."),
     CARD_INFO_NOT_FOUND(HttpStatus.OK, "CARD_200_002", "신청된 카드 정보가 없습니다."),
     CURRENT_SPEND_AMOUNT_FOUND(HttpStatus.OK, "CARD_200_003", "당월 이용 금액 조회가 완료되었습니다."),
-    PREVIOUS_PERFORMANCE_FOUND(HttpStatus.OK, "CARD_200_004", "전월 실적 조회가 완료되었습니다."),
 
     REWARD_LEDGER_FOUND(HttpStatus.OK, "REWARD_200_001", "리워드 내역 조회가 완료되었습니다."),
     REWARD_LEDGER_DETAIL_FOUND(HttpStatus.OK, "REWARD_200_002", "상세 리워드 내역 조회가 완료되었습니다."),

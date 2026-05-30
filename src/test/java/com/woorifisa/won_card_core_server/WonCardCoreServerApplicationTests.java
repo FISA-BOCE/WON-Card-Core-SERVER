@@ -3,6 +3,8 @@ package com.woorifisa.won_card_core_server;
 import com.woorifisa.won_card_core_server.domain.card.dto.request.CardApplicationRequest;
 import com.woorifisa.won_card_core_server.domain.card.dto.response.CardApplicationResponse;
 import com.woorifisa.won_card_core_server.domain.card.exception.code.CardErrorCode;
+import com.woorifisa.won_card_core_server.domain.card.model.CardUser;
+import com.woorifisa.won_card_core_server.domain.card.model.CardUserStatus;
 import com.woorifisa.won_card_core_server.domain.card.model.Gender;
 import com.woorifisa.won_card_core_server.domain.card.repository.CardRepository;
 import com.woorifisa.won_card_core_server.domain.card.repository.CardUserRepository;
@@ -58,10 +60,38 @@ class WonCardCoreServerApplicationTests {
 
         CardApplicationResponse response = cardApplicationService.createCardApplication(userUuid, request);
 
+        assertThat(response.cardUserUuid()).isNotNull();
         assertThat(response.cardUuid()).isNotNull();
         assertThat(response.cardNoDisplay()).startsWith("****-****-****-");
         assertThat(response.cardStatus()).isEqualTo("ACTIVE");
-        assertThat(cardUserRepository.findByUserUuid(userUuid)).isPresent();
+        CardUser savedCardUser = cardUserRepository.findByUserUuid(userUuid).orElseThrow();
+        assertThat(response.cardUserUuid()).isEqualTo(savedCardUser.getCardUserUuid());
+        assertThat(cardRepository.count()).isEqualTo(1);
+        assertThat(cardPerformanceRepository.count()).isEqualTo(1);
+    }
+
+    @Test
+    void createCardApplication_whenCardUserAlreadyExists_reusesCardUserUuidInResponse() {
+        UUID userUuid = UUID.randomUUID();
+        CardUser existingCardUser = cardUserRepository.saveAndFlush(CardUser.builder()
+                .userUuid(userUuid)
+                .userNameEnc(textEncryptor.encrypt("Existing User"))
+                .birthDateEnc(textEncryptor.encrypt("19900101"))
+                .gender(Gender.M)
+                .ciHash("existing-ci-hash")
+                .nationality("KR")
+                .userStatus(CardUserStatus.ACTIVE)
+                .isAgree(true)
+                .telEnc(textEncryptor.encrypt("01099998888"))
+                .emailEnc(textEncryptor.encrypt("existing@example.com"))
+                .addressEnc(textEncryptor.encrypt("Seoul Mapo-gu"))
+                .build());
+        CardApplicationRequest request = createRequest(true);
+
+        CardApplicationResponse response = cardApplicationService.createCardApplication(userUuid, request);
+
+        assertThat(response.cardUserUuid()).isEqualTo(existingCardUser.getCardUserUuid());
+        assertThat(cardUserRepository.count()).isEqualTo(1);
         assertThat(cardRepository.count()).isEqualTo(1);
         assertThat(cardPerformanceRepository.count()).isEqualTo(1);
     }

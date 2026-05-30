@@ -57,7 +57,7 @@ public class InternalRewardLedgerApi {
         CurrentRewardsAmount response = rewardGetService.getCurrentReward(userUuid);
 
         return ResponseEntity
-                .status(SuccessStatus.PREVIOUS_PERFORMANCE_FOUND.getHttpStatus())
-                .body(ApiResponse.of(SuccessStatus.PREVIOUS_PERFORMANCE_FOUND, response));
+                .status(SuccessStatus.REWARD_LEDGER_FOUND.getHttpStatus())
+                .body(ApiResponse.of(SuccessStatus.REWARD_LEDGER_FOUND, response));
     }
 }

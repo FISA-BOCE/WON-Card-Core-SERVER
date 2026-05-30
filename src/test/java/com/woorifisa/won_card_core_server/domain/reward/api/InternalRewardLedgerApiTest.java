@@ -175,7 +175,7 @@ class InternalRewardLedgerApiTest {
                 )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(200))
-                .andExpect(jsonPath("$.code").value("CARD_200_004"))
+                .andExpect(jsonPath("$.code").value("REWARD_200_001"))
                 .andExpect(jsonPath("$.data.baseMonth").value("2026-05"))
                 .andExpect(jsonPath("$.data.rewardStatus").value("기준 충족"))
                 .andExpect(jsonPath("$.data.previousMonthSpendAmount").value(820000))

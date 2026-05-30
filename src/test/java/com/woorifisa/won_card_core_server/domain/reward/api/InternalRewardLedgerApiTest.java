@@ -156,11 +156,11 @@ class InternalRewardLedgerApiTest {
         // given
         CurrentRewardsAmount response = new CurrentRewardsAmount(
                 "2026-05",
-                "SATISFIED",
+                "기준 충족",
                 820000L,
                 12450L,
                 new BigDecimal("0.015"),
-                "COMPLETE"
+                "2"
         );
 
         given(rewardGetService.getCurrentReward(eq(USER_UUID)))
@@ -177,11 +177,11 @@ class InternalRewardLedgerApiTest {
                 .andExpect(jsonPath("$.status").value(200))
                 .andExpect(jsonPath("$.code").value("CARD_200_004"))
                 .andExpect(jsonPath("$.data.baseMonth").value("2026-05"))
-                .andExpect(jsonPath("$.data.rewardStatus").value("SATISFIED"))
+                .andExpect(jsonPath("$.data.rewardStatus").value("기준 충족"))
                 .andExpect(jsonPath("$.data.previousMonthSpendAmount").value(820000))
                 .andExpect(jsonPath("$.data.rewardPointAmount").value(12450))
                 .andExpect(jsonPath("$.data.rewardRate").value(0.015))
-                .andExpect(jsonPath("$.data.performanceStatus").value("COMPLETE"));
+                .andExpect(jsonPath("$.data.performanceStatus").value("2"));
 
         then(rewardGetService).should().getCurrentReward(USER_UUID);
     }

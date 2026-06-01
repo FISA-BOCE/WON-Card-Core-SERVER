@@ -92,4 +92,12 @@ public class CardPointLedger extends BaseTimeEntity {
         this.sweepRequestId = null;
     }
 
+    public void markSweepCompleted() {
+        this.sweepStatus = SweepStatus.COMPLETED;
+    }
+
+    public void markSweepFailed() {
+        this.sweepStatus = SweepStatus.FAILED;
+    }
+
 }

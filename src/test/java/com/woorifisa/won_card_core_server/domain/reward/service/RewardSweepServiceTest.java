@@ -567,7 +567,7 @@ class RewardSweepServiceTest {
                 1L,
                 "CORR-SWEEP-TEST-1",
                 "SWEEP:POINT_LEDGER:1",
-                "COMPLETED"
+                SweepStatus.COMPLETED
         );
 
         RewardSweepResultResponse response =
@@ -599,7 +599,7 @@ class RewardSweepServiceTest {
                 1L,
                 "CORR-SWEEP-TEST-1",
                 "SWEEP:POINT_LEDGER:1",
-                "FAILED"
+                SweepStatus.FAILED
         );
 
         RewardSweepResultResponse response =
@@ -607,6 +607,37 @@ class RewardSweepServiceTest {
 
         assertThat(ledger.getSweepStatus()).isEqualTo(SweepStatus.FAILED);
         assertThat(response.sweepStatus()).isEqualTo(SweepStatus.FAILED.name());
+    }
+
+    @Test
+    @DisplayName("이미 COMPLETED인 원장에 COMPLETED 결과가 다시 들어오면 멱등 성공한다")
+    void applySweepResultCompletedIdempotent() {
+        CardPointLedger ledger = createLedger(
+                1L,
+                cardUserUuid,
+                10L,
+                RewardProcessStatus.EARN,
+                SweepStatus.COMPLETED,
+                BigDecimal.valueOf(1000),
+                BigDecimal.ZERO
+        );
+
+        when(cardPointLedgerRepository.findByIdForUpdate(1L))
+                .thenReturn(Optional.of(ledger));
+
+        RewardSweepResultRequest request = new RewardSweepResultRequest(
+                2L,
+                1L,
+                "CORR-SWEEP-TEST-1",
+                "SWEEP:POINT_LEDGER:1",
+                SweepStatus.COMPLETED
+        );
+
+        RewardSweepResultResponse response =
+                rewardSweepService.applySweepResult(cardUserUuid, 1L, request);
+
+        assertThat(ledger.getSweepStatus()).isEqualTo(SweepStatus.COMPLETED);
+        assertThat(response.sweepStatus()).isEqualTo(SweepStatus.COMPLETED.name());
     }
 
     @Test
@@ -630,7 +661,7 @@ class RewardSweepServiceTest {
                 1L,
                 "CORR-SWEEP-TEST-1",
                 "SWEEP:POINT_LEDGER:1",
-                "COMPLETED"
+                SweepStatus.COMPLETED
         );
 
         BusinessException exception = assertThrows(

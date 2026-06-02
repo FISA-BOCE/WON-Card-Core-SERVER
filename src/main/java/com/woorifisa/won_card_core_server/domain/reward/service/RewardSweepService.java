@@ -107,12 +107,17 @@ public class RewardSweepService {
             throw new BusinessException(RewardErrorCode.INVALID_REWARD_LEDGER_STATUS);
         }
 
+        SweepStatus requestedResultStatus = request.resultStatus();
+
+        if (requestedResultStatus != SweepStatus.COMPLETED
+                && requestedResultStatus != SweepStatus.FAILED) {
+            throw new BusinessException(RewardErrorCode.INVALID_REWARD_LEDGER_STATUS);
+        }
+
         CardPointLedger pointLedger = cardPointLedgerRepository.findByIdForUpdate(pointLedgerId)
                 .orElseThrow(() -> new BusinessException(RewardErrorCode.REWARD_LEDGER_NOT_FOUND));
 
         rewardLedgerValidator.validateOwner(pointLedger, cardUserUuid);
-
-        SweepStatus requestedResultStatus = request.resultStatus();
 
         if (pointLedger.getSweepStatus() == requestedResultStatus) {
             return RewardSweepResultResponse.from(pointLedger);
@@ -124,10 +129,8 @@ public class RewardSweepService {
 
         if (requestedResultStatus == SweepStatus.COMPLETED) {
             pointLedger.markSweepCompleted();
-        } else if (requestedResultStatus == SweepStatus.FAILED) {
-            pointLedger.markSweepFailed();
         } else {
-            throw new BusinessException(RewardErrorCode.INVALID_REWARD_LEDGER_STATUS);
+            pointLedger.markSweepFailed();
         }
 
         return RewardSweepResultResponse.from(pointLedger);

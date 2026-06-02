@@ -10,6 +10,7 @@ import com.woorifisa.won_card_core_server.global.response.ApiResponse;
 import com.woorifisa.won_card_core_server.global.response.SuccessStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -82,7 +83,7 @@ public class InternalRewardSweepApi {
     public ResponseEntity<ApiResponse<RewardSweepResultResponse>> applySweepResult(
             @RequestHeader("X-Card-User-UUID") UUID cardUserUuid,
             @PathVariable Long pointLedgerId,
-            @RequestBody RewardSweepResultRequest request
+            @Valid @RequestBody RewardSweepResultRequest request
     ) {
         RewardSweepResultResponse response =
                 rewardSweepService.applySweepResult(cardUserUuid, pointLedgerId, request);

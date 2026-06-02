@@ -103,7 +103,7 @@ public class RewardSweepService {
 
     @Transactional
     public RewardSweepResultResponse applySweepResult(UUID cardUserUuid, Long pointLedgerId, RewardSweepResultRequest request) {
-        if (request == null || request.resultStatus() == null || request.resultStatus().isBlank()) {
+        if (request == null || request.resultStatus() == null) {
             throw new BusinessException(RewardErrorCode.INVALID_REWARD_LEDGER_STATUS);
         }
 
@@ -112,13 +112,19 @@ public class RewardSweepService {
 
         rewardLedgerValidator.validateOwner(pointLedger, cardUserUuid);
 
+        SweepStatus requestedResultStatus = request.resultStatus();
+
+        if (pointLedger.getSweepStatus() == requestedResultStatus) {
+            return RewardSweepResultResponse.from(pointLedger);
+        }
+
         if (pointLedger.getSweepStatus() != SweepStatus.REQUESTED) {
             throw new BusinessException(RewardErrorCode.REWARD_SWEEP_NOT_ELIGIBLE);
         }
 
-        if ("COMPLETED".equals(request.resultStatus())) {
+        if (requestedResultStatus == SweepStatus.COMPLETED) {
             pointLedger.markSweepCompleted();
-        } else if ("FAILED".equals(request.resultStatus())) {
+        } else if (requestedResultStatus == SweepStatus.FAILED) {
             pointLedger.markSweepFailed();
         } else {
             throw new BusinessException(RewardErrorCode.INVALID_REWARD_LEDGER_STATUS);

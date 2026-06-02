@@ -3,9 +3,8 @@ package com.woorifisa.won_card_core_server.domain.reward.service;
 import com.woorifisa.won_card_core_server.domain.performance.exception.code.CardPerformanceErrorCode;
 import com.woorifisa.won_card_core_server.domain.performance.model.CardPerformance;
 import com.woorifisa.won_card_core_server.domain.performance.repository.CardPerformanceRepository;
-import com.woorifisa.won_card_core_server.domain.reward.dto.response.RewardSweepCancelResponse;
-import com.woorifisa.won_card_core_server.domain.reward.dto.response.RewardSweepCandidateResponse;
-import com.woorifisa.won_card_core_server.domain.reward.dto.response.RewardSweepRequestResponse;
+import com.woorifisa.won_card_core_server.domain.reward.dto.request.RewardSweepResultRequest;
+import com.woorifisa.won_card_core_server.domain.reward.dto.response.*;
 import com.woorifisa.won_card_core_server.domain.reward.exception.code.RewardErrorCode;
 import com.woorifisa.won_card_core_server.domain.reward.model.CardPointLedger;
 import com.woorifisa.won_card_core_server.domain.reward.model.enums.RewardProcessStatus;
@@ -102,6 +101,40 @@ public class RewardSweepService {
         return RewardSweepCancelResponse.from(pointLedger);
     }
 
+    @Transactional
+    public RewardSweepResultResponse applySweepResult(UUID cardUserUuid, Long pointLedgerId, RewardSweepResultRequest request) {
+        if (request == null || request.resultStatus() == null) {
+            throw new BusinessException(RewardErrorCode.INVALID_REWARD_LEDGER_STATUS);
+        }
+
+        SweepStatus requestedResultStatus = request.resultStatus();
+
+        if (requestedResultStatus != SweepStatus.COMPLETED
+                && requestedResultStatus != SweepStatus.FAILED) {
+            throw new BusinessException(RewardErrorCode.INVALID_REWARD_LEDGER_STATUS);
+        }
+
+        CardPointLedger pointLedger = cardPointLedgerRepository.findByIdForUpdate(pointLedgerId)
+                .orElseThrow(() -> new BusinessException(RewardErrorCode.REWARD_LEDGER_NOT_FOUND));
+
+        rewardLedgerValidator.validateOwner(pointLedger, cardUserUuid);
+
+        if (pointLedger.getSweepStatus() == requestedResultStatus) {
+            return RewardSweepResultResponse.from(pointLedger);
+        }
+
+        if (pointLedger.getSweepStatus() != SweepStatus.REQUESTED) {
+            throw new BusinessException(RewardErrorCode.REWARD_SWEEP_NOT_ELIGIBLE);
+        }
+
+        if (requestedResultStatus == SweepStatus.COMPLETED) {
+            pointLedger.markSweepCompleted();
+        } else {
+            pointLedger.markSweepFailed();
+        }
+
+        return RewardSweepResultResponse.from(pointLedger);
+    }
 
     private void validateBaseMonth(String baseMonth) {
         if (baseMonth == null || baseMonth.isBlank() || !baseMonth.matches("\\d{4}-(0[1-9]|1[0-2])")) {

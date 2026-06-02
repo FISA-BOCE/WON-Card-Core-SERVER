@@ -3,9 +3,11 @@ package com.woorifisa.won_card_core_server.domain.reward.service;
 import com.woorifisa.won_card_core_server.domain.performance.exception.code.CardPerformanceErrorCode;
 import com.woorifisa.won_card_core_server.domain.performance.model.CardPerformance;
 import com.woorifisa.won_card_core_server.domain.performance.repository.CardPerformanceRepository;
+import com.woorifisa.won_card_core_server.domain.reward.dto.request.RewardSweepResultRequest;
 import com.woorifisa.won_card_core_server.domain.reward.dto.response.RewardSweepCancelResponse;
 import com.woorifisa.won_card_core_server.domain.reward.dto.response.RewardSweepCandidateResponse;
 import com.woorifisa.won_card_core_server.domain.reward.dto.response.RewardSweepRequestResponse;
+import com.woorifisa.won_card_core_server.domain.reward.dto.response.RewardSweepResultResponse;
 import com.woorifisa.won_card_core_server.domain.reward.exception.code.RewardErrorCode;
 import com.woorifisa.won_card_core_server.domain.reward.model.CardPointLedger;
 import com.woorifisa.won_card_core_server.domain.reward.model.enums.RewardProcessStatus;
@@ -543,6 +545,165 @@ class RewardSweepServiceTest {
         assertThat(exception.getErrorCode()).isEqualTo(RewardErrorCode.REWARD_LEDGER_FORBIDDEN);
         assertThat(ledger.getSweepStatus()).isEqualTo(SweepStatus.REQUESTED);
     }
+
+    @Test
+    @DisplayName("투자 완료 결과를 받으면 REQUESTED 원장을 COMPLETED로 반영한다")
+    void applySweepResultCompleted() {
+        CardPointLedger ledger = createLedger(
+                1L,
+                cardUserUuid,
+                10L,
+                RewardProcessStatus.EARN,
+                SweepStatus.REQUESTED,
+                BigDecimal.valueOf(1000),
+                BigDecimal.ZERO
+        );
+
+        when(cardPointLedgerRepository.findByIdForUpdate(1L))
+                .thenReturn(Optional.of(ledger));
+
+        RewardSweepResultRequest request = new RewardSweepResultRequest(
+                2L,
+                1L,
+                "CORR-SWEEP-TEST-1",
+                "SWEEP:POINT_LEDGER:1",
+                SweepStatus.COMPLETED
+        );
+
+        RewardSweepResultResponse response =
+                rewardSweepService.applySweepResult(cardUserUuid, 1L, request);
+
+        assertThat(ledger.getSweepStatus()).isEqualTo(SweepStatus.COMPLETED);
+        assertThat(response.pointLedgerId()).isEqualTo(1L);
+        assertThat(response.sweepStatus()).isEqualTo(SweepStatus.COMPLETED.name());
+    }
+
+    @Test
+    @DisplayName("투자 실패 결과를 받으면 REQUESTED 원장을 FAILED로 반영한다")
+    void applySweepResultFailed() {
+        CardPointLedger ledger = createLedger(
+                1L,
+                cardUserUuid,
+                10L,
+                RewardProcessStatus.EARN,
+                SweepStatus.REQUESTED,
+                BigDecimal.valueOf(1000),
+                BigDecimal.ZERO
+        );
+
+        when(cardPointLedgerRepository.findByIdForUpdate(1L))
+                .thenReturn(Optional.of(ledger));
+
+        RewardSweepResultRequest request = new RewardSweepResultRequest(
+                2L,
+                1L,
+                "CORR-SWEEP-TEST-1",
+                "SWEEP:POINT_LEDGER:1",
+                SweepStatus.FAILED
+        );
+
+        RewardSweepResultResponse response =
+                rewardSweepService.applySweepResult(cardUserUuid, 1L, request);
+
+        assertThat(ledger.getSweepStatus()).isEqualTo(SweepStatus.FAILED);
+        assertThat(response.sweepStatus()).isEqualTo(SweepStatus.FAILED.name());
+    }
+
+    @Test
+    @DisplayName("이미 COMPLETED인 원장에 COMPLETED 결과가 다시 들어오면 멱등 성공한다")
+    void applySweepResultCompletedIdempotent() {
+        CardPointLedger ledger = createLedger(
+                1L,
+                cardUserUuid,
+                10L,
+                RewardProcessStatus.EARN,
+                SweepStatus.COMPLETED,
+                BigDecimal.valueOf(1000),
+                BigDecimal.ZERO
+        );
+
+        when(cardPointLedgerRepository.findByIdForUpdate(1L))
+                .thenReturn(Optional.of(ledger));
+
+        RewardSweepResultRequest request = new RewardSweepResultRequest(
+                2L,
+                1L,
+                "CORR-SWEEP-TEST-1",
+                "SWEEP:POINT_LEDGER:1",
+                SweepStatus.COMPLETED
+        );
+
+        RewardSweepResultResponse response =
+                rewardSweepService.applySweepResult(cardUserUuid, 1L, request);
+
+        assertThat(ledger.getSweepStatus()).isEqualTo(SweepStatus.COMPLETED);
+        assertThat(response.sweepStatus()).isEqualTo(SweepStatus.COMPLETED.name());
+    }
+
+    @Test
+    @DisplayName("REQUESTED 상태가 아닌 원장에는 결과를 반영할 수 없다")
+    void applySweepResultNotRequested() {
+        CardPointLedger ledger = createLedger(
+                1L,
+                cardUserUuid,
+                10L,
+                RewardProcessStatus.EARN,
+                SweepStatus.NONE,
+                BigDecimal.valueOf(1000),
+                BigDecimal.ZERO
+        );
+
+        when(cardPointLedgerRepository.findByIdForUpdate(1L))
+                .thenReturn(Optional.of(ledger));
+
+        RewardSweepResultRequest request = new RewardSweepResultRequest(
+                2L,
+                1L,
+                "CORR-SWEEP-TEST-1",
+                "SWEEP:POINT_LEDGER:1",
+                SweepStatus.COMPLETED
+        );
+
+        BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> rewardSweepService.applySweepResult(cardUserUuid, 1L, request)
+        );
+
+        assertThat(exception.getErrorCode()).isEqualTo(RewardErrorCode.REWARD_SWEEP_NOT_ELIGIBLE);
+    }
+
+    @Test
+    @DisplayName("결과 상태가 COMPLETED 또는 FAILED가 아니면 예외를 던진다")
+    void applySweepResultInvalidResultStatus() {
+        CardPointLedger ledger = createLedger(
+                1L,
+                cardUserUuid,
+                10L,
+                RewardProcessStatus.EARN,
+                SweepStatus.REQUESTED,
+                BigDecimal.valueOf(1000),
+                BigDecimal.ZERO
+        );
+
+        when(cardPointLedgerRepository.findByIdForUpdate(1L))
+                .thenReturn(Optional.of(ledger));
+
+        RewardSweepResultRequest request = new RewardSweepResultRequest(
+                2L,
+                1L,
+                "CORR-SWEEP-TEST-1",
+                "SWEEP:POINT_LEDGER:1",
+                SweepStatus.REQUESTED
+        );
+
+        BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> rewardSweepService.applySweepResult(cardUserUuid, 1L, request)
+        );
+
+        assertThat(exception.getErrorCode()).isEqualTo(RewardErrorCode.INVALID_REWARD_LEDGER_STATUS);
+    }
+
 
     private CardPointLedger createLedger(
             Long pointLedgerId,

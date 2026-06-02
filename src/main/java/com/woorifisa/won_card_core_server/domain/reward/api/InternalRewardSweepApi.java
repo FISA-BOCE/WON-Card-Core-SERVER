@@ -1,13 +1,16 @@
 package com.woorifisa.won_card_core_server.domain.reward.api;
 
+import com.woorifisa.won_card_core_server.domain.reward.dto.request.RewardSweepResultRequest;
 import com.woorifisa.won_card_core_server.domain.reward.dto.response.RewardSweepCancelResponse;
 import com.woorifisa.won_card_core_server.domain.reward.dto.response.RewardSweepCandidateResponse;
 import com.woorifisa.won_card_core_server.domain.reward.dto.response.RewardSweepRequestResponse;
+import com.woorifisa.won_card_core_server.domain.reward.dto.response.RewardSweepResultResponse;
 import com.woorifisa.won_card_core_server.domain.reward.service.RewardSweepService;
 import com.woorifisa.won_card_core_server.global.response.ApiResponse;
 import com.woorifisa.won_card_core_server.global.response.SuccessStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -70,6 +73,24 @@ public class InternalRewardSweepApi {
         return ResponseEntity
                 .status(SuccessStatus.REWARD_SWEEP_CANDIDATES_FOUND.getHttpStatus())
                 .body(ApiResponse.of(SuccessStatus.REWARD_SWEEP_CANDIDATES_FOUND, response));
+    }
+
+    @Operation(
+            summary = "리워드 원장 스윕 결과 반영",
+            description = "카드 채널계가 수신한 자동 투자 결과를 기준으로 리워드 원장의 스윕 상태를 COMPLETED 또는 FAILED로 최종 반영합니다."
+    )
+    @PostMapping("/ledger/{pointLedgerId}/sweep-result")
+    public ResponseEntity<ApiResponse<RewardSweepResultResponse>> applySweepResult(
+            @RequestHeader("X-Card-User-UUID") UUID cardUserUuid,
+            @PathVariable Long pointLedgerId,
+            @Valid @RequestBody RewardSweepResultRequest request
+    ) {
+        RewardSweepResultResponse response =
+                rewardSweepService.applySweepResult(cardUserUuid, pointLedgerId, request);
+
+        return ResponseEntity
+                .status(SuccessStatus.REWARD_SWEEP_RESULT_APPLIED.getHttpStatus())
+                .body(ApiResponse.of(SuccessStatus.REWARD_SWEEP_RESULT_APPLIED, response));
     }
 
 }

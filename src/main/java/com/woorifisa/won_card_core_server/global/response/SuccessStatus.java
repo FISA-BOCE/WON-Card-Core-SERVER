@@ -22,9 +22,8 @@ public enum SuccessStatus {
     REWARD_SWEEP_CANDIDATES_FOUND(HttpStatus.OK, "SWEEP_200_002", "스윕 후보 리워드 원장 조회가 완료되었습니다."),
     REWARD_SWEEP_REQUEST_CANCELLED(HttpStatus.OK, "SWEEP_200_003", "리워드 원장 스윕 요청이 취소되었습니다."),
     REWARD_SWEEP_RESULT_APPLIED(HttpStatus.OK, "SWEEP_200_004", "스윕 최종 결과가 반영되었습니다."),
-    REWARD_SWEEP_OUTBOX_CLAIMED(HttpStatus.OK, "SWEEP_200_005", "스윕 요청 Outbox 선점이 완료되었습니다."),
-    REWARD_SWEEP_OUTBOX_PUBLISHED(HttpStatus.OK, "SWEEP_200_006", "스윕 요청 Outbox 발행 성공이 반영되었습니다."),
-    REWARD_SWEEP_OUTBOX_FAILED(HttpStatus.OK, "SWEEP_200_007", "스윕 요청 Outbox 발행 실패가 반영되었습니다.");
+    REWARD_SWEEP_BATCH_STARTED(HttpStatus.OK, "SWEEP_200_005", "스윕 배치 실행이 시작되었습니다."),
+    REWARD_SWEEP_BATCH_RESERVED(HttpStatus.OK, "SWEEP_200_006", "스윕 배치 후보 선점이 완료되었습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

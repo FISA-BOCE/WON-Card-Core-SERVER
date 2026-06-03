@@ -1,10 +1,13 @@
 package com.woorifisa.won_card_core_server.domain.reward.service;
 
 import com.woorifisa.won_card_core_server.domain.reward.dto.response.RewardSweepBatchStartResponse;
+import com.woorifisa.won_card_core_server.domain.reward.dto.response.RewardSweepReservationResponse;
 import com.woorifisa.won_card_core_server.domain.reward.dto.result.RewardSweepChunkReservationResult;
+import com.woorifisa.won_card_core_server.domain.reward.exception.code.RewardErrorCode;
 import com.woorifisa.won_card_core_server.domain.reward.model.RewardSweepBatchExecution;
 import com.woorifisa.won_card_core_server.domain.reward.model.enums.RewardSweepBatchStatus;
 import com.woorifisa.won_card_core_server.domain.reward.repository.RewardSweepBatchExecutionRepository;
+import com.woorifisa.won_card_core_server.global.exception.handler.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -26,23 +29,19 @@ public class RewardSweepBatchService {
 
         RewardSweepBatchExecution batch = batchRepository.save(RewardSweepBatchExecution.start(baseMonth, LocalDateTime.now()));
 
-        int size = chunkSize == null ? DEFAULT_CHUNK_SIZE : chunkSize;
-        Long lastSeenId = 0L;
+        return RewardSweepBatchStartResponse.from(batch);
+    }
 
-        while (true) {
-            RewardSweepChunkReservationResult result = reservationService.reserve(batch.getBatchExecutionId(), baseMonth, lastSeenId, size);
+    public RewardSweepReservationResponse reserve(Long batchExecutionId, Integer size) {
+        int chunkSize = size == null ? DEFAULT_CHUNK_SIZE : size;
+        validateChunkSize(chunkSize);
 
-            if (result.reservedCount() == 0) {
-                break;
-            }
+        RewardSweepChunkReservationResult result = reservationService.reserve(batchExecutionId, chunkSize);
 
-            lastSeenId = result.lastProcessedPointLedgerId();
-        }
+        RewardSweepBatchExecution batch = batchRepository.findById(batchExecutionId)
+                .orElseThrow(() -> new BusinessException(RewardErrorCode.REWARD_SWEEP_BATCH_NOT_FOUND));
 
-        RewardSweepBatchExecution updatedBatch = batchRepository.findById(batch.getBatchExecutionId())
-                .orElseThrow();
-
-        return RewardSweepBatchStartResponse.from(updatedBatch);
+        return RewardSweepReservationResponse.from(batch, result);
     }
 
     private void validateNoRunningBatch(String baseMonth) {
@@ -52,13 +51,19 @@ public class RewardSweepBatchService {
         );
 
         if (exists) {
-            throw new IllegalStateException("이미 실행 중인 스윕 배치가 있습니다.");
+            throw new BusinessException(RewardErrorCode.REWARD_SWEEP_BATCH_ALREADY_RUNNING);
         }
     }
 
     private void validateBaseMonth(String baseMonth) {
         if (baseMonth == null || !baseMonth.matches("\\d{4}-(0[1-9]|1[0-2])")) {
-            throw new IllegalArgumentException("잘못된 기준월입니다.");
+            throw new BusinessException(RewardErrorCode.INVALID_REWARD_BASE_MONTH);
+        }
+    }
+
+    private void validateChunkSize(int chunkSize) {
+        if (chunkSize <= 0) {
+            throw new BusinessException(RewardErrorCode.INVALID_REWARD_SWEEP_BATCH_SIZE);
         }
     }
 }

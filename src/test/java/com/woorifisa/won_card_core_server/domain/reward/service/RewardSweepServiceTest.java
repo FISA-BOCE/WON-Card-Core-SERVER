@@ -13,6 +13,7 @@ import com.woorifisa.won_card_core_server.domain.reward.model.CardPointLedger;
 import com.woorifisa.won_card_core_server.domain.reward.model.enums.RewardProcessStatus;
 import com.woorifisa.won_card_core_server.domain.reward.model.enums.SweepStatus;
 import com.woorifisa.won_card_core_server.domain.reward.repository.CardPointLedgerRepository;
+import com.woorifisa.won_card_core_server.domain.reward.repository.RewardSweepBatchExecutionRepository;
 import com.woorifisa.won_card_core_server.domain.reward.service.validator.RewardLedgerValidator;
 import com.woorifisa.won_card_core_server.global.exception.handler.BusinessException;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +35,7 @@ class RewardSweepServiceTest {
 
     private CardPointLedgerRepository cardPointLedgerRepository;
     private CardPerformanceRepository cardPerformanceRepository;
+    private RewardSweepBatchExecutionRepository rewardSweepBatchExecutionRepository;
     private RewardLedgerValidator rewardLedgerValidator;
     private RewardSweepService rewardSweepService;
 
@@ -43,12 +45,14 @@ class RewardSweepServiceTest {
     void setUp() {
         cardPointLedgerRepository = mock(CardPointLedgerRepository.class);
         cardPerformanceRepository = mock(CardPerformanceRepository.class);
+        rewardSweepBatchExecutionRepository = mock(RewardSweepBatchExecutionRepository.class);
         rewardLedgerValidator = new RewardLedgerValidator();
 
         rewardSweepService = new RewardSweepService(
                 cardPointLedgerRepository,
                 cardPerformanceRepository,
-                rewardLedgerValidator
+                rewardLedgerValidator,
+                rewardSweepBatchExecutionRepository
         );
     }
 
@@ -567,7 +571,9 @@ class RewardSweepServiceTest {
                 1L,
                 "CORR-SWEEP-TEST-1",
                 "SWEEP:POINT_LEDGER:1",
-                SweepStatus.COMPLETED
+                SweepStatus.COMPLETED,
+                null,
+                null
         );
 
         RewardSweepResultResponse response =
@@ -599,7 +605,9 @@ class RewardSweepServiceTest {
                 1L,
                 "CORR-SWEEP-TEST-1",
                 "SWEEP:POINT_LEDGER:1",
-                SweepStatus.FAILED
+                SweepStatus.FAILED,
+                "SWEEP_FAIL_006",
+                "ETF 가격을 조회할 수 없습니다."
         );
 
         RewardSweepResultResponse response =
@@ -630,7 +638,9 @@ class RewardSweepServiceTest {
                 1L,
                 "CORR-SWEEP-TEST-1",
                 "SWEEP:POINT_LEDGER:1",
-                SweepStatus.COMPLETED
+                SweepStatus.COMPLETED,
+                null,
+                null
         );
 
         RewardSweepResultResponse response =
@@ -661,7 +671,9 @@ class RewardSweepServiceTest {
                 1L,
                 "CORR-SWEEP-TEST-1",
                 "SWEEP:POINT_LEDGER:1",
-                SweepStatus.COMPLETED
+                SweepStatus.COMPLETED,
+                null,
+                null
         );
 
         BusinessException exception = assertThrows(
@@ -693,7 +705,9 @@ class RewardSweepServiceTest {
                 1L,
                 "CORR-SWEEP-TEST-1",
                 "SWEEP:POINT_LEDGER:1",
-                SweepStatus.REQUESTED
+                SweepStatus.REQUESTED,
+                null,
+                null
         );
 
         BusinessException exception = assertThrows(

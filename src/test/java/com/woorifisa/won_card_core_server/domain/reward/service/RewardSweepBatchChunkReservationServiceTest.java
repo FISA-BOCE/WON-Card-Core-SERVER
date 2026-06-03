@@ -3,18 +3,13 @@ package com.woorifisa.won_card_core_server.domain.reward.service;
 import com.woorifisa.won_card_core_server.domain.reward.dto.result.RewardSweepChunkReservationResult;
 import com.woorifisa.won_card_core_server.domain.reward.model.CardPointLedger;
 import com.woorifisa.won_card_core_server.domain.reward.model.RewardSweepBatchExecution;
-import com.woorifisa.won_card_core_server.domain.reward.model.SweepRequestOutbox;
 import com.woorifisa.won_card_core_server.domain.reward.model.enums.RewardProcessStatus;
 import com.woorifisa.won_card_core_server.domain.reward.model.enums.SweepStatus;
-import com.woorifisa.won_card_core_server.domain.reward.model.enums.SweepRequestOutboxStatus;
 import com.woorifisa.won_card_core_server.domain.reward.repository.CardPointLedgerRepository;
 import com.woorifisa.won_card_core_server.domain.reward.repository.RewardSweepBatchExecutionRepository;
-import com.woorifisa.won_card_core_server.domain.reward.repository.SweepRequestOutboxRepository;
-import com.woorifisa.won_card_core_server.domain.reward.service.factory.SweepRequestPayloadFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.springframework.data.domain.PageRequest;
 
 import java.lang.reflect.Constructor;
@@ -33,28 +28,22 @@ class RewardSweepBatchChunkReservationServiceTest {
 
     private RewardSweepBatchExecutionRepository batchRepository;
     private CardPointLedgerRepository pointLedgerRepository;
-    private SweepRequestOutboxRepository outboxRepository;
-    private SweepRequestPayloadFactory payloadFactory;
     private RewardSweepBatchChunkReservationService service;
 
     @BeforeEach
     void setUp() {
         batchRepository = mock(RewardSweepBatchExecutionRepository.class);
         pointLedgerRepository = mock(CardPointLedgerRepository.class);
-        outboxRepository = mock(SweepRequestOutboxRepository.class);
-        payloadFactory = mock(SweepRequestPayloadFactory.class);
 
         service = new RewardSweepBatchChunkReservationService(
                 batchRepository,
-                pointLedgerRepository,
-                outboxRepository,
-                payloadFactory
+                pointLedgerRepository
         );
     }
 
     @Test
-    @DisplayName("후보 chunk를 REQUESTED로 선점하고 outbox READY를 생성한다")
-    void reserveCandidatesCreatesOutboxes() {
+    @DisplayName("후보 chunk를 REQUESTED로 선점하고 선점 항목을 반환한다")
+    void reserveCandidatesReturnsReservedItems() {
         // given
         RewardSweepBatchExecution batch = RewardSweepBatchExecution.start("2026-06", LocalDateTime.now());
         setField(batch, "batchExecutionId", 10L);
@@ -70,17 +59,14 @@ class RewardSweepBatchChunkReservationServiceTest {
                 eq(0L),
                 any(PageRequest.class)
         )).thenReturn(List.of(first, second));
-        when(payloadFactory.create(any(CardPointLedger.class), anyLong()))
-                .thenReturn("{\"eventType\":\"SWEEP_REQUESTED\"}");
-        when(outboxRepository.save(any(SweepRequestOutbox.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
 
         // when
-        RewardSweepChunkReservationResult result = service.reserve(10L, "2026-06", 0L, 300);
+        RewardSweepChunkReservationResult result = service.reserve(10L, 300);
 
         // then
         assertThat(result.reservedCount()).isEqualTo(2);
         assertThat(result.lastProcessedPointLedgerId()).isEqualTo(2L);
+        assertThat(result.reservedItems()).hasSize(2);
 
         assertThat(first.getSweepStatus()).isEqualTo(SweepStatus.REQUESTED);
         assertThat(first.getBatchExecutionId()).isEqualTo(10L);
@@ -91,16 +77,19 @@ class RewardSweepBatchChunkReservationServiceTest {
         assertThat(second.getSweepStatus()).isEqualTo(SweepStatus.REQUESTED);
         assertThat(second.getIdempotencyKey()).isEqualTo("CARD_SWEEP:2:2026-06");
 
-        ArgumentCaptor<SweepRequestOutbox> outboxCaptor = ArgumentCaptor.forClass(SweepRequestOutbox.class);
-        verify(outboxRepository, times(2)).save(outboxCaptor.capture());
-
-        List<SweepRequestOutbox> savedOutboxes = outboxCaptor.getAllValues();
-        assertThat(savedOutboxes).hasSize(2);
-        assertThat(savedOutboxes.get(0).getBatchExecutionId()).isEqualTo(10L);
-        assertThat(savedOutboxes.get(0).getPointLedgerId()).isEqualTo(1L);
-        assertThat(savedOutboxes.get(0).getSweepRequestId()).isEqualTo(1L);
-        assertThat(savedOutboxes.get(0).getIdempotencyKey()).isEqualTo("CARD_SWEEP:1:2026-06");
-        assertThat(savedOutboxes.get(0).getStatus()).isEqualTo(SweepRequestOutboxStatus.READY);
+        var firstItem = result.reservedItems().get(0);
+        assertThat(firstItem.sweepRequestId()).isEqualTo(1L);
+        assertThat(firstItem.eventType()).isEqualTo("SWEEP_REQUESTED");
+        assertThat(firstItem.eventId()).isEqualTo("CARD-SWEEP-1");
+        assertThat(firstItem.correlationId()).isEqualTo("CARD-SWEEP-1");
+        assertThat(firstItem.idempotencyKey()).isEqualTo("CARD_SWEEP:1:2026-06");
+        assertThat(firstItem.cardUserUuid()).isEqualTo(first.getCardUserUuid());
+        assertThat(firstItem.performanceId()).isEqualTo(100L);
+        assertThat(firstItem.pointLedgerId()).isEqualTo(1L);
+        assertThat(firstItem.baseMonth()).isEqualTo("2026-06");
+        assertThat(firstItem.pointAmount()).isEqualTo(10000L);
+        assertThat(firstItem.krwAmount()).isEqualTo(10000L);
+        assertThat(firstItem.requestedAt()).isEqualTo(first.getSweepRequestedAt());
 
         assertThat(batch.getRequestedCount()).isEqualTo(2);
         assertThat(batch.getTotalCandidateCount()).isEqualTo(2);
@@ -108,7 +97,7 @@ class RewardSweepBatchChunkReservationServiceTest {
     }
 
     @Test
-    @DisplayName("후보가 없으면 batch 카운터와 outbox를 변경하지 않는다")
+    @DisplayName("후보가 없으면 batch 카운터를 변경하지 않고 빈 선점 항목을 반환한다")
     void reserveEmptyCandidatesDoesNothing() {
         // given
         RewardSweepBatchExecution batch = RewardSweepBatchExecution.start("2026-06", LocalDateTime.now());
@@ -124,14 +113,14 @@ class RewardSweepBatchChunkReservationServiceTest {
         )).thenReturn(List.of());
 
         // when
-        RewardSweepChunkReservationResult result = service.reserve(10L, "2026-06", 20L, 300);
+        setField(batch, "lastProcessedPointLedgerId", 20L);
+        RewardSweepChunkReservationResult result = service.reserve(10L, 300);
 
         // then
         assertThat(result.reservedCount()).isZero();
         assertThat(result.lastProcessedPointLedgerId()).isEqualTo(20L);
+        assertThat(result.reservedItems()).isEmpty();
         assertThat(batch.getRequestedCount()).isZero();
-        verify(outboxRepository, never()).save(any());
-        verify(payloadFactory, never()).create(any(), anyLong());
     }
 
     private CardPointLedger createLedger(Long pointLedgerId, String baseMonth) {

@@ -4,6 +4,7 @@ import com.woorifisa.won_card_core_server.domain.reward.model.CardPointLedger;
 import com.woorifisa.won_card_core_server.domain.reward.model.enums.RewardProcessStatus;
 import com.woorifisa.won_card_core_server.domain.reward.model.enums.SweepStatus;
 import jakarta.persistence.LockModeType;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -86,6 +87,25 @@ public interface CardPointLedgerRepository extends JpaRepository<CardPointLedger
             @Param("baseMonth") String baseMonth,
             @Param("rewardProcessStatus") RewardProcessStatus rewardProcessStatus,
             @Param("sweepStatus") SweepStatus sweepStatus
+    );
+
+    @Query("""
+            select l
+            from CardPointLedger l
+            where l.baseMonth = :baseMonth
+              and l.rewardProcessStatus = :rewardProcessStatus
+              and l.sweepStatus = :sweepStatus
+              and l.inAmount is not null
+              and l.inAmount >= 1
+              and l.pointLedgerId > :lastSeenId
+            order by l.pointLedgerId asc
+            """)
+    List<CardPointLedger> findSweepCandidateChunk(
+            @Param("baseMonth") String baseMonth,
+            @Param("rewardProcessStatus") RewardProcessStatus rewardProcessStatus,
+            @Param("sweepStatus") SweepStatus sweepStatus,
+            @Param("lastSeenId") Long lastSeenId,
+            Pageable pageable
     );
 
 }

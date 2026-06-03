@@ -7,9 +7,11 @@ import com.woorifisa.won_card_core_server.domain.reward.dto.request.RewardSweepR
 import com.woorifisa.won_card_core_server.domain.reward.dto.response.*;
 import com.woorifisa.won_card_core_server.domain.reward.exception.code.RewardErrorCode;
 import com.woorifisa.won_card_core_server.domain.reward.model.CardPointLedger;
+import com.woorifisa.won_card_core_server.domain.reward.model.RewardSweepBatchExecution;
 import com.woorifisa.won_card_core_server.domain.reward.model.enums.RewardProcessStatus;
 import com.woorifisa.won_card_core_server.domain.reward.model.enums.SweepStatus;
 import com.woorifisa.won_card_core_server.domain.reward.repository.CardPointLedgerRepository;
+import com.woorifisa.won_card_core_server.domain.reward.repository.RewardSweepBatchExecutionRepository;
 import com.woorifisa.won_card_core_server.domain.reward.service.validator.RewardLedgerValidator;
 import com.woorifisa.won_card_core_server.global.exception.handler.BusinessException;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ public class RewardSweepService {
     private final CardPointLedgerRepository cardPointLedgerRepository;
     private final CardPerformanceRepository cardPerformanceRepository;
     private final RewardLedgerValidator rewardLedgerValidator;
+    private final RewardSweepBatchExecutionRepository batchRepository;
 
     @Transactional
     public RewardSweepRequestResponse requestSweep(UUID cardUserUuid, Long pointLedgerId) {
@@ -129,8 +132,10 @@ public class RewardSweepService {
 
         if (requestedResultStatus == SweepStatus.COMPLETED) {
             pointLedger.markSweepCompleted();
+            increaseBatchCompleted(pointLedger.getBatchExecutionId());
         } else {
-            pointLedger.markSweepFailed();
+            pointLedger.markSweepFailed(request.sweepFailureCode(), request.sweepFailureMessage());
+            increaseBatchFailed(pointLedger.getBatchExecutionId());
         }
 
         return RewardSweepResultResponse.from(pointLedger);
@@ -165,4 +170,23 @@ public class RewardSweepService {
             throw new BusinessException(RewardErrorCode.REWARD_SWEEP_ALREADY_REQUESTED);
         }
     }
+
+    private void increaseBatchCompleted(Long batchExecutionId) {
+        if (batchExecutionId == null) {
+            return;
+        }
+
+        batchRepository.findById(batchExecutionId)
+                .ifPresent(RewardSweepBatchExecution::increaseCompleted);
+    }
+
+    private void increaseBatchFailed(Long batchExecutionId) {
+        if (batchExecutionId == null) {
+            return;
+        }
+
+        batchRepository.findById(batchExecutionId)
+                .ifPresent(RewardSweepBatchExecution::increaseFailed);
+    }
+
 }

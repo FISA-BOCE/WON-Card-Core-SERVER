@@ -71,6 +71,21 @@ public class CardPointLedger extends BaseTimeEntity {
     @Column(name = "base_month", nullable = false, length = 7)
     private String baseMonth;
 
+    @Column(name = "batch_execution_id")
+    private Long batchExecutionId;
+
+    @Column(name = "idempotency_key", length = 100)
+    private String idempotencyKey;
+
+    @Column(name = "sweep_requested_at")
+    private LocalDateTime sweepRequestedAt;
+
+    @Column(name = "sweep_failure_code", length = 50)
+    private String sweepFailureCode;
+
+    @Column(name = "sweep_failure_message", length = 500)
+    private String sweepFailureMessage;
+
     public Long getDisplayPointAmount() {
         if (inAmount != null && inAmount.compareTo(BigDecimal.ZERO) > 0) {
             return inAmount.setScale(0, RoundingMode.DOWN).longValue();
@@ -83,21 +98,46 @@ public class CardPointLedger extends BaseTimeEntity {
         return 0L;
     }
 
+    public void markSweepRequested(
+            Long batchExecutionId,
+            String idempotencyKey,
+            LocalDateTime requestedAt
+    ) {
+        this.batchExecutionId = batchExecutionId;
+        this.sweepRequestId = this.pointLedgerId;
+        this.idempotencyKey = idempotencyKey;
+        this.sweepRequestedAt = requestedAt;
+        this.sweepStatus = SweepStatus.REQUESTED;
+        this.sweepFailureCode = null;
+        this.sweepFailureMessage = null;
+    }
+
     public void markSweepRequested() {
         this.sweepStatus = SweepStatus.REQUESTED;
+        this.sweepFailureCode = null;
+        this.sweepFailureMessage = null;
     }
 
     public void cancelSweepRequested() {
         this.sweepStatus = SweepStatus.NONE;
         this.sweepRequestId = null;
+        this.batchExecutionId = null;
+        this.idempotencyKey = null;
+        this.sweepRequestedAt = null;
+        this.sweepFailureCode = null;
+        this.sweepFailureMessage = null;
     }
 
     public void markSweepCompleted() {
         this.sweepStatus = SweepStatus.COMPLETED;
+        this.sweepFailureCode = null;
+        this.sweepFailureMessage = null;
     }
 
-    public void markSweepFailed() {
+    public void markSweepFailed(String failureCode, String failureMessage) {
         this.sweepStatus = SweepStatus.FAILED;
+        this.sweepFailureCode = failureCode;
+        this.sweepFailureMessage = failureMessage;
     }
 
 }

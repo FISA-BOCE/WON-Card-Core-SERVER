@@ -15,6 +15,9 @@ public record RewardLedgerResponse(
             String baseMonth,
             Long pointAmount,
             String type,
+            String sweepStatus,
+            String sweepFailureCode,
+            String sweepFailureMessage,
             LocalDateTime occurredAt
     ) {
 
@@ -24,6 +27,9 @@ public record RewardLedgerResponse(
                     ledger.getBaseMonth(),
                     ledger.getDisplayPointAmount(),
                     ledger.getRewardProcessStatus().name(),
+                    ledger.getSweepStatus().name(),
+                    ledger.getSweepFailureCode(),
+                    ledger.getSweepFailureMessage(),
                     ledger.getOccurredAt()
             );
         }

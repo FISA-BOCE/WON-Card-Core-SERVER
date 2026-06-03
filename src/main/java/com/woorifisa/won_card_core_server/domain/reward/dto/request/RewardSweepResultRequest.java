@@ -18,6 +18,10 @@ public record RewardSweepResultRequest(
         String idempotencyKey,
 
         @NotNull
-        SweepStatus resultStatus
+        SweepStatus resultStatus,
+
+        String failureCode,
+
+        String failureMessage
 ) {
 }

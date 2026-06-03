@@ -130,7 +130,7 @@ public class RewardSweepService {
         if (requestedResultStatus == SweepStatus.COMPLETED) {
             pointLedger.markSweepCompleted();
         } else {
-            pointLedger.markSweepFailed();
+            pointLedger.markSweepFailed(request.failureCode(), request.failureMessage());
         }
 
         return RewardSweepResultResponse.from(pointLedger);

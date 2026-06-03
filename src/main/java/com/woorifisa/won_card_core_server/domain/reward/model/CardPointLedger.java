@@ -71,6 +71,12 @@ public class CardPointLedger extends BaseTimeEntity {
     @Column(name = "base_month", nullable = false, length = 7)
     private String baseMonth;
 
+    @Column(name = "sweep_failure_code", length = 50)
+    private String sweepFailureCode;
+
+    @Column(name = "sweep_failure_message", length = 500)
+    private String sweepFailureMessage;
+
     public Long getDisplayPointAmount() {
         if (inAmount != null && inAmount.compareTo(BigDecimal.ZERO) > 0) {
             return inAmount.setScale(0, RoundingMode.DOWN).longValue();
@@ -85,6 +91,8 @@ public class CardPointLedger extends BaseTimeEntity {
 
     public void markSweepRequested() {
         this.sweepStatus = SweepStatus.REQUESTED;
+        this.sweepFailureCode = null;
+        this.sweepFailureMessage = null;
     }
 
     public void cancelSweepRequested() {
@@ -94,10 +102,14 @@ public class CardPointLedger extends BaseTimeEntity {
 
     public void markSweepCompleted() {
         this.sweepStatus = SweepStatus.COMPLETED;
+        this.sweepFailureCode = null;
+        this.sweepFailureMessage = null;
     }
 
-    public void markSweepFailed() {
+    public void markSweepFailed(String failureCode, String failureMessage) {
         this.sweepStatus = SweepStatus.FAILED;
+        this.sweepFailureCode = failureCode;
+        this.sweepFailureMessage = failureMessage;
     }
 
 }

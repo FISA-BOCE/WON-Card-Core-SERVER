@@ -178,7 +178,7 @@ public class RewardSweepService {
             return;
         }
 
-        batchRepository.findById(batchExecutionId)
+        batchRepository.findByIdForUpdate(batchExecutionId)
                 .ifPresentOrElse(
                         RewardSweepBatchExecution::increaseCompleted,
                         () -> log.warn("스윕 배치 완료 집계 대상이 없습니다. batchExecutionId={}", batchExecutionId)
@@ -190,7 +190,7 @@ public class RewardSweepService {
             return;
         }
 
-        batchRepository.findById(batchExecutionId)
+        batchRepository.findByIdForUpdate(batchExecutionId)
                 .ifPresentOrElse(
                         RewardSweepBatchExecution::increaseFailed,
                         () -> log.warn("스윕 배치 실패 집계 대상이 없습니다. batchExecutionId={}", batchExecutionId)

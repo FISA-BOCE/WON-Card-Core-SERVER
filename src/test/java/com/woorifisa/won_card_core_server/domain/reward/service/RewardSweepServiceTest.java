@@ -10,6 +10,7 @@ import com.woorifisa.won_card_core_server.domain.reward.dto.response.RewardSweep
 import com.woorifisa.won_card_core_server.domain.reward.dto.response.RewardSweepResultResponse;
 import com.woorifisa.won_card_core_server.domain.reward.exception.code.RewardErrorCode;
 import com.woorifisa.won_card_core_server.domain.reward.model.CardPointLedger;
+import com.woorifisa.won_card_core_server.domain.reward.model.RewardSweepBatchExecution;
 import com.woorifisa.won_card_core_server.domain.reward.model.enums.RewardProcessStatus;
 import com.woorifisa.won_card_core_server.domain.reward.model.enums.SweepStatus;
 import com.woorifisa.won_card_core_server.domain.reward.repository.CardPointLedgerRepository;
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -562,9 +564,15 @@ class RewardSweepServiceTest {
                 BigDecimal.valueOf(1000),
                 BigDecimal.ZERO
         );
+        setField(ledger, "batchExecutionId", 10L);
+        RewardSweepBatchExecution batch = RewardSweepBatchExecution.start("2026-05", LocalDateTime.now());
+        setField(batch, "batchExecutionId", 10L);
+        setField(batch, "totalCandidateCount", 1L);
 
         when(cardPointLedgerRepository.findByIdForUpdate(1L))
                 .thenReturn(Optional.of(ledger));
+        when(rewardSweepBatchExecutionRepository.findByIdForUpdate(10L))
+                .thenReturn(Optional.of(batch));
 
         RewardSweepResultRequest request = new RewardSweepResultRequest(
                 2L,
@@ -582,6 +590,8 @@ class RewardSweepServiceTest {
         assertThat(ledger.getSweepStatus()).isEqualTo(SweepStatus.COMPLETED);
         assertThat(response.pointLedgerId()).isEqualTo(1L);
         assertThat(response.sweepStatus()).isEqualTo(SweepStatus.COMPLETED.name());
+        assertThat(batch.getCompletedCount()).isEqualTo(1);
+        verify(rewardSweepBatchExecutionRepository).findByIdForUpdate(10L);
     }
 
     @Test
@@ -596,9 +606,15 @@ class RewardSweepServiceTest {
                 BigDecimal.valueOf(1000),
                 BigDecimal.ZERO
         );
+        setField(ledger, "batchExecutionId", 10L);
+        RewardSweepBatchExecution batch = RewardSweepBatchExecution.start("2026-05", LocalDateTime.now());
+        setField(batch, "batchExecutionId", 10L);
+        setField(batch, "totalCandidateCount", 1L);
 
         when(cardPointLedgerRepository.findByIdForUpdate(1L))
                 .thenReturn(Optional.of(ledger));
+        when(rewardSweepBatchExecutionRepository.findByIdForUpdate(10L))
+                .thenReturn(Optional.of(batch));
 
         RewardSweepResultRequest request = new RewardSweepResultRequest(
                 2L,
@@ -615,6 +631,8 @@ class RewardSweepServiceTest {
 
         assertThat(ledger.getSweepStatus()).isEqualTo(SweepStatus.FAILED);
         assertThat(response.sweepStatus()).isEqualTo(SweepStatus.FAILED.name());
+        assertThat(batch.getFailedCount()).isEqualTo(1);
+        verify(rewardSweepBatchExecutionRepository).findByIdForUpdate(10L);
     }
 
     @Test

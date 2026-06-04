@@ -33,9 +33,6 @@ public class RewardSweepBatchExecution extends BaseTimeEntity {
     @Column(name = "requested_count", nullable = false)
     private long requestedCount;
 
-    @Column(name = "published_count", nullable = false)
-    private long publishedCount;
-
     @Column(name = "completed_count", nullable = false)
     private long completedCount;
 
@@ -50,9 +47,6 @@ public class RewardSweepBatchExecution extends BaseTimeEntity {
 
     @Column(name = "started_at", nullable = false)
     private LocalDateTime startedAt;
-
-    @Column(name = "published_at")
-    private LocalDateTime publishedAt;
 
     @Column(name = "completed_at")
     private LocalDateTime completedAt;
@@ -73,14 +67,6 @@ public class RewardSweepBatchExecution extends BaseTimeEntity {
         this.totalCandidateCount += count;
         this.requestedCount += count;
         this.lastProcessedPointLedgerId = lastProcessedPointLedgerId;
-    }
-
-    public void increasePublished() {
-        this.publishedCount++;
-        if (this.publishedCount == this.totalCandidateCount) {
-            this.status = RewardSweepBatchStatus.PUBLISHED;
-            this.publishedAt = LocalDateTime.now();
-        }
     }
 
     public void increaseCompleted() {

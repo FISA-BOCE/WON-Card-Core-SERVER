@@ -47,7 +47,7 @@ public class RewardSweepBatchService {
     private void validateNoRunningBatch(String baseMonth) {
         boolean exists = batchRepository.existsByBaseMonthAndStatusIn(
                 baseMonth,
-                List.of(RewardSweepBatchStatus.RUNNING, RewardSweepBatchStatus.PUBLISHED)
+                List.of(RewardSweepBatchStatus.RUNNING)
         );
 
         if (exists) {

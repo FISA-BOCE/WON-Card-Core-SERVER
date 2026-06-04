@@ -5,6 +5,7 @@ import com.woorifisa.won_card_core_server.domain.reward.dto.response.RewardSweep
 import com.woorifisa.won_card_core_server.domain.reward.exception.code.RewardErrorCode;
 import com.woorifisa.won_card_core_server.domain.reward.model.CardPointLedger;
 import com.woorifisa.won_card_core_server.domain.reward.model.RewardSweepBatchExecution;
+import com.woorifisa.won_card_core_server.domain.reward.model.enums.RewardSweepBatchStatus;
 import com.woorifisa.won_card_core_server.domain.reward.model.enums.RewardProcessStatus;
 import com.woorifisa.won_card_core_server.domain.reward.model.enums.SweepStatus;
 import com.woorifisa.won_card_core_server.domain.reward.repository.CardPointLedgerRepository;
@@ -33,6 +34,8 @@ public class RewardSweepBatchChunkReservationService {
     ) {
         RewardSweepBatchExecution batch = batchRepository.findByIdForUpdate(batchExecutionId)
                 .orElseThrow(() -> new BusinessException(RewardErrorCode.REWARD_SWEEP_BATCH_NOT_FOUND));
+
+        validateBatchRunning(batch);
 
         Long lastSeenId = batch.getLastProcessedPointLedgerId() == null
                 ? 0L
@@ -70,5 +73,11 @@ public class RewardSweepBatchChunkReservationService {
         batch.addRequested(candidates.size(), lastProcessedId);
 
         return new RewardSweepChunkReservationResult(candidates.size(), lastProcessedId, reservedItems);
+    }
+
+    private void validateBatchRunning(RewardSweepBatchExecution batch) {
+        if (batch.getStatus() != RewardSweepBatchStatus.RUNNING) {
+            throw new BusinessException(RewardErrorCode.REWARD_SWEEP_BATCH_NOT_RUNNING);
+        }
     }
 }

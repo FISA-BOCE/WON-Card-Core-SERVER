@@ -23,6 +23,7 @@ public enum RewardErrorCode implements ErrorCode {
     REWARD_SWEEP_NOT_ELIGIBLE(HttpStatus.UNPROCESSABLE_ENTITY, "REWARD_422_001", "스윕할 수 없는 리워드 원장입니다."),
     REWARD_SWEEP_AMOUNT_INVALID(HttpStatus.UNPROCESSABLE_ENTITY, "REWARD_422_002", "스윕 가능한 리워드 금액이 없습니다."),
     REWARD_SWEEP_CANCEL_NOT_ALLOWED(HttpStatus.UNPROCESSABLE_ENTITY, "REWARD_422_003", "취소할 수 없는 스윕 요청 상태입니다."),
+    REWARD_SWEEP_BATCH_NOT_RUNNING(HttpStatus.UNPROCESSABLE_ENTITY, "REWARD_422_004", "실행 중인 스윕 배치가 아닙니다."),
 
     INVALID_REWARD_LEDGER_STATUS(HttpStatus.INTERNAL_SERVER_ERROR, "REWARD_500_001", "리워드 내역 상태가 올바르지 않습니다.");
 

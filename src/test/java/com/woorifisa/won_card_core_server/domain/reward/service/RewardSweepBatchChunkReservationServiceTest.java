@@ -1,12 +1,15 @@
 package com.woorifisa.won_card_core_server.domain.reward.service;
 
 import com.woorifisa.won_card_core_server.domain.reward.dto.result.RewardSweepChunkReservationResult;
+import com.woorifisa.won_card_core_server.domain.reward.exception.code.RewardErrorCode;
 import com.woorifisa.won_card_core_server.domain.reward.model.CardPointLedger;
 import com.woorifisa.won_card_core_server.domain.reward.model.RewardSweepBatchExecution;
+import com.woorifisa.won_card_core_server.domain.reward.model.enums.RewardSweepBatchStatus;
 import com.woorifisa.won_card_core_server.domain.reward.model.enums.RewardProcessStatus;
 import com.woorifisa.won_card_core_server.domain.reward.model.enums.SweepStatus;
 import com.woorifisa.won_card_core_server.domain.reward.repository.CardPointLedgerRepository;
 import com.woorifisa.won_card_core_server.domain.reward.repository.RewardSweepBatchExecutionRepository;
+import com.woorifisa.won_card_core_server.global.exception.handler.BusinessException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,6 +24,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -123,6 +127,25 @@ class RewardSweepBatchChunkReservationServiceTest {
         assertThat(result.lastProcessedPointLedgerId()).isEqualTo(20L);
         assertThat(result.reservedItems()).isEmpty();
         assertThat(batch.getRequestedCount()).isZero();
+    }
+
+    @Test
+    @DisplayName("실행 중이 아닌 배치에는 후보 선점을 허용하지 않는다")
+    void reserveThrowsBusinessExceptionWhenBatchNotRunning() {
+        // given
+        RewardSweepBatchExecution batch = RewardSweepBatchExecution.start("2026-06", LocalDateTime.now());
+        setField(batch, "batchExecutionId", 10L);
+        setField(batch, "status", RewardSweepBatchStatus.COMPLETED);
+
+        when(batchRepository.findByIdForUpdate(10L)).thenReturn(Optional.of(batch));
+
+        // when & then
+        assertThatThrownBy(() -> service.reserve(10L, 300))
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(RewardErrorCode.REWARD_SWEEP_BATCH_NOT_RUNNING);
+
+        verify(pointLedgerRepository, never()).findSweepCandidateChunk(any(), any(), any(), any(), any());
     }
 
     private CardPointLedger createLedger(Long pointLedgerId, String baseMonth) {

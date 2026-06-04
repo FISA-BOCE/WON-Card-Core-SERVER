@@ -31,7 +31,7 @@ public class RewardSweepBatchChunkReservationService {
             Long batchExecutionId,
             int chunkSize
     ) {
-        RewardSweepBatchExecution batch = batchRepository.findById(batchExecutionId)
+        RewardSweepBatchExecution batch = batchRepository.findByIdForUpdate(batchExecutionId)
                 .orElseThrow(() -> new BusinessException(RewardErrorCode.REWARD_SWEEP_BATCH_NOT_FOUND));
 
         Long lastSeenId = batch.getLastProcessedPointLedgerId() == null

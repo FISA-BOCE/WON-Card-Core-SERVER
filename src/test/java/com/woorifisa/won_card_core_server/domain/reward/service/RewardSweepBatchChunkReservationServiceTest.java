@@ -51,7 +51,7 @@ class RewardSweepBatchChunkReservationServiceTest {
         CardPointLedger first = createLedger(1L, "2026-06");
         CardPointLedger second = createLedger(2L, "2026-06");
 
-        when(batchRepository.findById(10L)).thenReturn(Optional.of(batch));
+        when(batchRepository.findByIdForUpdate(10L)).thenReturn(Optional.of(batch));
         when(pointLedgerRepository.findSweepCandidateChunk(
                 eq("2026-06"),
                 eq(RewardProcessStatus.EARN),
@@ -94,6 +94,8 @@ class RewardSweepBatchChunkReservationServiceTest {
         assertThat(batch.getRequestedCount()).isEqualTo(2);
         assertThat(batch.getTotalCandidateCount()).isEqualTo(2);
         assertThat(batch.getLastProcessedPointLedgerId()).isEqualTo(2L);
+
+        verify(batchRepository).findByIdForUpdate(10L);
     }
 
     @Test
@@ -103,7 +105,7 @@ class RewardSweepBatchChunkReservationServiceTest {
         RewardSweepBatchExecution batch = RewardSweepBatchExecution.start("2026-06", LocalDateTime.now());
         setField(batch, "batchExecutionId", 10L);
 
-        when(batchRepository.findById(10L)).thenReturn(Optional.of(batch));
+        when(batchRepository.findByIdForUpdate(10L)).thenReturn(Optional.of(batch));
         when(pointLedgerRepository.findSweepCandidateChunk(
                 eq("2026-06"),
                 eq(RewardProcessStatus.EARN),

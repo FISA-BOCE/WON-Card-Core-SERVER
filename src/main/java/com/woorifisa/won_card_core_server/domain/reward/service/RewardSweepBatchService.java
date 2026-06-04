@@ -10,6 +10,7 @@ import com.woorifisa.won_card_core_server.domain.reward.repository.RewardSweepBa
 import com.woorifisa.won_card_core_server.global.exception.handler.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,6 +24,7 @@ public class RewardSweepBatchService {
     private final RewardSweepBatchExecutionRepository batchRepository;
     private final RewardSweepBatchChunkReservationService reservationService;
 
+    @Transactional
     public RewardSweepBatchStartResponse start(String baseMonth) {
         validateBaseMonth(baseMonth);
         validateNoRunningBatch(baseMonth);

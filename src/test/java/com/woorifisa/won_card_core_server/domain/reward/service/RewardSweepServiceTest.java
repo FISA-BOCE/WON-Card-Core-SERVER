@@ -11,6 +11,7 @@ import com.woorifisa.won_card_core_server.domain.reward.dto.response.RewardSweep
 import com.woorifisa.won_card_core_server.domain.reward.exception.code.RewardErrorCode;
 import com.woorifisa.won_card_core_server.domain.reward.model.CardPointLedger;
 import com.woorifisa.won_card_core_server.domain.reward.model.RewardSweepBatchExecution;
+import com.woorifisa.won_card_core_server.domain.reward.model.enums.RewardSweepBatchStatus;
 import com.woorifisa.won_card_core_server.domain.reward.model.enums.RewardProcessStatus;
 import com.woorifisa.won_card_core_server.domain.reward.model.enums.SweepStatus;
 import com.woorifisa.won_card_core_server.domain.reward.repository.CardPointLedgerRepository;
@@ -632,6 +633,7 @@ class RewardSweepServiceTest {
         assertThat(ledger.getSweepStatus()).isEqualTo(SweepStatus.FAILED);
         assertThat(response.sweepStatus()).isEqualTo(SweepStatus.FAILED.name());
         assertThat(batch.getFailedCount()).isEqualTo(1);
+        assertThat(batch.getStatus()).isEqualTo(RewardSweepBatchStatus.FAILED);
         verify(rewardSweepBatchExecutionRepository).findByIdForUpdate(10L);
     }
 

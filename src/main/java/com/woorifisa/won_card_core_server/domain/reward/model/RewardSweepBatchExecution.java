@@ -84,9 +84,13 @@ public class RewardSweepBatchExecution extends BaseTimeEntity {
             return;
         }
 
-        this.status = failedCount == 0
-                ? RewardSweepBatchStatus.COMPLETED
-                : RewardSweepBatchStatus.PARTIALLY_FAILED;
+        if (failedCount == 0) {
+            this.status = RewardSweepBatchStatus.COMPLETED;
+        } else if (completedCount == 0) {
+            this.status = RewardSweepBatchStatus.FAILED;
+        } else {
+            this.status = RewardSweepBatchStatus.PARTIALLY_FAILED;
+        }
         this.completedAt = LocalDateTime.now();
     }
 

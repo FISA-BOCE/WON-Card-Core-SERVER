@@ -51,7 +51,7 @@ class RewardSweepBatchServiceTest {
                 });
 
         // when
-        var response = service.start("2026-06", 300);
+        var response = service.start("2026-06");
 
         // then
         assertThat(response.batchExecutionId()).isEqualTo(10L);
@@ -106,7 +106,7 @@ class RewardSweepBatchServiceTest {
                 .thenReturn(true);
 
         // when & then
-        assertThatThrownBy(() -> service.start("2026-06", 300))
+        assertThatThrownBy(() -> service.start("2026-06"))
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
                 .isEqualTo(RewardErrorCode.REWARD_SWEEP_BATCH_ALREADY_RUNNING);
@@ -115,7 +115,7 @@ class RewardSweepBatchServiceTest {
     @Test
     @DisplayName("기준월 형식이 올바르지 않으면 비즈니스 예외를 던진다")
     void startThrowsBusinessExceptionWhenBaseMonthInvalid() {
-        assertThatThrownBy(() -> service.start("2026-13", 300))
+        assertThatThrownBy(() -> service.start("2026-13"))
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
                 .isEqualTo(RewardErrorCode.INVALID_REWARD_BASE_MONTH);

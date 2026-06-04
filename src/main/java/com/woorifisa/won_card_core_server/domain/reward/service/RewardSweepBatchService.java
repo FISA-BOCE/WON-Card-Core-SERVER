@@ -23,7 +23,7 @@ public class RewardSweepBatchService {
     private final RewardSweepBatchExecutionRepository batchRepository;
     private final RewardSweepBatchChunkReservationService reservationService;
 
-    public RewardSweepBatchStartResponse start(String baseMonth, Integer chunkSize) {
+    public RewardSweepBatchStartResponse start(String baseMonth) {
         validateBaseMonth(baseMonth);
         validateNoRunningBatch(baseMonth);
 

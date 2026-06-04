@@ -26,7 +26,7 @@ public class InternalRewardSweepBatchApi {
     public ResponseEntity<ApiResponse<RewardSweepBatchStartResponse>> start(
             @RequestBody RewardSweepBatchStartRequest request
     ) {
-        RewardSweepBatchStartResponse response = rewardSweepBatchService.start(request.baseMonth(), request.chunkSize());
+        RewardSweepBatchStartResponse response = rewardSweepBatchService.start(request.baseMonth());
 
         return ResponseEntity
                 .status(SuccessStatus.REWARD_SWEEP_BATCH_STARTED.getHttpStatus())

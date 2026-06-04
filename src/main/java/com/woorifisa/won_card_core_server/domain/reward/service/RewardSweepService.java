@@ -15,12 +15,14 @@ import com.woorifisa.won_card_core_server.domain.reward.repository.RewardSweepBa
 import com.woorifisa.won_card_core_server.domain.reward.service.validator.RewardLedgerValidator;
 import com.woorifisa.won_card_core_server.global.exception.handler.BusinessException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -177,7 +179,10 @@ public class RewardSweepService {
         }
 
         batchRepository.findById(batchExecutionId)
-                .ifPresent(RewardSweepBatchExecution::increaseCompleted);
+                .ifPresentOrElse(
+                        RewardSweepBatchExecution::increaseCompleted,
+                        () -> log.warn("스윕 배치 완료 집계 대상이 없습니다. batchExecutionId={}", batchExecutionId)
+                );
     }
 
     private void increaseBatchFailed(Long batchExecutionId) {
@@ -186,7 +191,10 @@ public class RewardSweepService {
         }
 
         batchRepository.findById(batchExecutionId)
-                .ifPresent(RewardSweepBatchExecution::increaseFailed);
+                .ifPresentOrElse(
+                        RewardSweepBatchExecution::increaseFailed,
+                        () -> log.warn("스윕 배치 실패 집계 대상이 없습니다. batchExecutionId={}", batchExecutionId)
+                );
     }
 
 }

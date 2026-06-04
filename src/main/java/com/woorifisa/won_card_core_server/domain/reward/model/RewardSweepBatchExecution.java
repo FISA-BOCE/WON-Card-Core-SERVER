@@ -45,6 +45,9 @@ public class RewardSweepBatchExecution extends BaseTimeEntity {
     @Column(name = "last_processed_point_ledger_id")
     private Long lastProcessedPointLedgerId;
 
+    @Column(name = "reservation_closed", nullable = false)
+    private boolean reservationClosed;
+
     @Column(name = "started_at", nullable = false)
     private LocalDateTime startedAt;
 
@@ -80,6 +83,10 @@ public class RewardSweepBatchExecution extends BaseTimeEntity {
     }
 
     private void completeIfFinished() {
+        if (!reservationClosed) {
+            return;
+        }
+
         if (completedCount + failedCount < totalCandidateCount) {
             return;
         }
@@ -94,12 +101,8 @@ public class RewardSweepBatchExecution extends BaseTimeEntity {
         this.completedAt = LocalDateTime.now();
     }
 
-    public void completeWhenNoCandidates() {
-        if (this.totalCandidateCount != 0) {
-            return;
-        }
-
-        this.status = RewardSweepBatchStatus.COMPLETED;
-        this.completedAt = LocalDateTime.now();
+    public void closeReservation() {
+        this.reservationClosed = true;
+        completeIfFinished();
     }
 }

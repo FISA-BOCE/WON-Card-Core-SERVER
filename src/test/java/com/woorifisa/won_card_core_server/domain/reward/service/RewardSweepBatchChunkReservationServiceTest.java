@@ -103,8 +103,8 @@ class RewardSweepBatchChunkReservationServiceTest {
     }
 
     @Test
-    @DisplayName("후보가 없으면 batch 카운터를 변경하지 않고 빈 선점 항목을 반환한다")
-    void reserveEmptyCandidatesDoesNothing() {
+    @DisplayName("후보가 없으면 reservation을 닫고 빈 선점 항목을 반환한다")
+    void reserveEmptyCandidatesClosesReservation() {
         // given
         RewardSweepBatchExecution batch = RewardSweepBatchExecution.start("2026-06", LocalDateTime.now());
         setField(batch, "batchExecutionId", 10L);
@@ -127,6 +127,38 @@ class RewardSweepBatchChunkReservationServiceTest {
         assertThat(result.lastProcessedPointLedgerId()).isEqualTo(20L);
         assertThat(result.reservedItems()).isEmpty();
         assertThat(batch.getRequestedCount()).isZero();
+        assertThat(batch.isReservationClosed()).isTrue();
+        assertThat(batch.getStatus()).isEqualTo(RewardSweepBatchStatus.COMPLETED);
+    }
+
+    @Test
+    @DisplayName("선점된 결과가 모두 반영된 뒤 후보가 없으면 batch를 최종 완료한다")
+    void reserveEmptyCandidatesCompletesClosedBatchWhenAllResultsArrived() {
+        // given
+        RewardSweepBatchExecution batch = RewardSweepBatchExecution.start("2026-06", LocalDateTime.now());
+        setField(batch, "batchExecutionId", 10L);
+        setField(batch, "lastProcessedPointLedgerId", 20L);
+        setField(batch, "totalCandidateCount", 2L);
+        setField(batch, "requestedCount", 2L);
+        setField(batch, "completedCount", 2L);
+
+        when(batchRepository.findByIdForUpdate(10L)).thenReturn(Optional.of(batch));
+        when(pointLedgerRepository.findSweepCandidateChunk(
+                eq("2026-06"),
+                eq(RewardProcessStatus.EARN),
+                eq(SweepStatus.NONE),
+                eq(20L),
+                any(PageRequest.class)
+        )).thenReturn(List.of());
+
+        // when
+        RewardSweepChunkReservationResult result = service.reserve(10L, 300);
+
+        // then
+        assertThat(result.reservedCount()).isZero();
+        assertThat(batch.isReservationClosed()).isTrue();
+        assertThat(batch.getStatus()).isEqualTo(RewardSweepBatchStatus.COMPLETED);
+        assertThat(batch.getCompletedAt()).isNotNull();
     }
 
     @Test

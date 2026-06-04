@@ -592,6 +592,8 @@ class RewardSweepServiceTest {
         assertThat(response.pointLedgerId()).isEqualTo(1L);
         assertThat(response.sweepStatus()).isEqualTo(SweepStatus.COMPLETED.name());
         assertThat(batch.getCompletedCount()).isEqualTo(1);
+        assertThat(batch.getStatus()).isEqualTo(RewardSweepBatchStatus.RUNNING);
+        assertThat(batch.getCompletedAt()).isNull();
         verify(rewardSweepBatchExecutionRepository).findByIdForUpdate(10L);
     }
 
@@ -611,6 +613,7 @@ class RewardSweepServiceTest {
         RewardSweepBatchExecution batch = RewardSweepBatchExecution.start("2026-05", LocalDateTime.now());
         setField(batch, "batchExecutionId", 10L);
         setField(batch, "totalCandidateCount", 1L);
+        setField(batch, "reservationClosed", true);
 
         when(cardPointLedgerRepository.findByIdForUpdate(1L))
                 .thenReturn(Optional.of(ledger));
@@ -634,6 +637,7 @@ class RewardSweepServiceTest {
         assertThat(response.sweepStatus()).isEqualTo(SweepStatus.FAILED.name());
         assertThat(batch.getFailedCount()).isEqualTo(1);
         assertThat(batch.getStatus()).isEqualTo(RewardSweepBatchStatus.FAILED);
+        assertThat(batch.getCompletedAt()).isNotNull();
         verify(rewardSweepBatchExecutionRepository).findByIdForUpdate(10L);
     }
 

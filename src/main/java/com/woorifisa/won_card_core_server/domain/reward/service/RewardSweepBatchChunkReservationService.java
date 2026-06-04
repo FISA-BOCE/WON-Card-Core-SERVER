@@ -50,7 +50,7 @@ public class RewardSweepBatchChunkReservationService {
         );
 
         if (candidates.isEmpty()) {
-            batch.completeWhenNoCandidates();
+            batch.closeReservation();
             return new RewardSweepChunkReservationResult(0, lastSeenId, List.of());
         }
 

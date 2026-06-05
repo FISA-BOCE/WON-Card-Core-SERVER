@@ -567,7 +567,9 @@ class RewardSweepServiceTest {
                 1L,
                 "CORR-SWEEP-TEST-1",
                 "SWEEP:POINT_LEDGER:1",
-                SweepStatus.COMPLETED
+                SweepStatus.COMPLETED,
+                null,
+                null
         );
 
         RewardSweepResultResponse response =
@@ -599,13 +601,17 @@ class RewardSweepServiceTest {
                 1L,
                 "CORR-SWEEP-TEST-1",
                 "SWEEP:POINT_LEDGER:1",
-                SweepStatus.FAILED
+                SweepStatus.FAILED,
+                "SWEEP_FAIL_008",
+                "매수 가능한 금액이 부족합니다."
         );
 
         RewardSweepResultResponse response =
                 rewardSweepService.applySweepResult(cardUserUuid, 1L, request);
 
         assertThat(ledger.getSweepStatus()).isEqualTo(SweepStatus.FAILED);
+        assertThat(ledger.getSweepFailureCode()).isEqualTo("SWEEP_FAIL_008");
+        assertThat(ledger.getSweepFailureMessage()).isEqualTo("매수 가능한 금액이 부족합니다.");
         assertThat(response.sweepStatus()).isEqualTo(SweepStatus.FAILED.name());
     }
 
@@ -630,7 +636,9 @@ class RewardSweepServiceTest {
                 1L,
                 "CORR-SWEEP-TEST-1",
                 "SWEEP:POINT_LEDGER:1",
-                SweepStatus.COMPLETED
+                SweepStatus.COMPLETED,
+                null,
+                null
         );
 
         RewardSweepResultResponse response =
@@ -661,7 +669,9 @@ class RewardSweepServiceTest {
                 1L,
                 "CORR-SWEEP-TEST-1",
                 "SWEEP:POINT_LEDGER:1",
-                SweepStatus.COMPLETED
+                SweepStatus.COMPLETED,
+                null,
+                null
         );
 
         BusinessException exception = assertThrows(
@@ -693,7 +703,9 @@ class RewardSweepServiceTest {
                 1L,
                 "CORR-SWEEP-TEST-1",
                 "SWEEP:POINT_LEDGER:1",
-                SweepStatus.REQUESTED
+                SweepStatus.REQUESTED,
+                null,
+                null
         );
 
         BusinessException exception = assertThrows(

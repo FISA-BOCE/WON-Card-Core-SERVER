@@ -9,6 +9,9 @@ public record RewardLedgerDetailResponse(
         String baseMonth,
         String type,
         Long pointAmount,
+        String sweepStatus,
+        String sweepFailureCode,
+        String sweepFailureMessage,
         LocalDateTime occurredAt,
         RewardDetail detail
 ) {
@@ -23,6 +26,9 @@ public record RewardLedgerDetailResponse(
                 pointLedger.getBaseMonth(),
                 pointLedger.getRewardProcessStatus().name(),
                 pointAmount,
+                pointLedger.getSweepStatus().name(),
+                pointLedger.getSweepFailureCode(),
+                pointLedger.getSweepFailureMessage(),
                 pointLedger.getOccurredAt(),
                 detail
         );

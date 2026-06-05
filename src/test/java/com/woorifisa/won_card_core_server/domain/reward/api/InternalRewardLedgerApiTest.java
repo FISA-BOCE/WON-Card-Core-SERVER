@@ -59,6 +59,9 @@ class InternalRewardLedgerApiTest {
                                 "2026-05",
                                 12450L,
                                 "EARN",
+                                "NONE",
+                                null,
+                                null,
                                 LocalDateTime.of(2026, 5, 7, 14, 32)
                         )
                 )
@@ -95,7 +98,7 @@ class InternalRewardLedgerApiTest {
 
         RewardLedgerDetailResponse response = new RewardLedgerDetailResponse(
                 pointLedgerId, "2026-05", "EARN",
-                12450L, LocalDateTime.of(2026, 5, 7, 14, 32),
+                12450L, "NONE", null, null, LocalDateTime.of(2026, 5, 7, 14, 32),
                 new RewardLedgerDetailResponse.RewardDetail(820000L, 500000L, 0L)
         );
 

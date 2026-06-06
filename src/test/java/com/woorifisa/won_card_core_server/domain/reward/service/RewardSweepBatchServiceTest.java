@@ -123,8 +123,17 @@ class RewardSweepBatchServiceTest {
 
     @Test
     @DisplayName("선점 chunkSize가 0 이하이면 비즈니스 예외를 던진다")
-    void reserveThrowsBusinessExceptionWhenChunkSizeInvalid() {
+    void reserveThrowsBusinessExceptionWhenChunkSizeNotPositive() {
         assertThatThrownBy(() -> service.reserve(10L, 0))
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(RewardErrorCode.INVALID_REWARD_SWEEP_BATCH_SIZE);
+    }
+
+    @Test
+    @DisplayName("선점 chunkSize가 상한을 초과하면 비즈니스 예외를 던진다")
+    void reserveThrowsBusinessExceptionWhenChunkSizeTooLarge() {
+        assertThatThrownBy(() -> service.reserve(10L, 1001))
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
                 .isEqualTo(RewardErrorCode.INVALID_REWARD_SWEEP_BATCH_SIZE);

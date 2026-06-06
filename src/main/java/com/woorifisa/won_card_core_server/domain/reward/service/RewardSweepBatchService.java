@@ -21,6 +21,7 @@ import java.util.List;
 public class RewardSweepBatchService {
 
     private static final int DEFAULT_CHUNK_SIZE = 300;
+    private static final int MAX_CHUNK_SIZE = 1000;
     private static final ZoneId KST = ZoneId.of("Asia/Seoul");
 
     private final RewardSweepBatchExecutionRepository batchRepository;
@@ -66,7 +67,7 @@ public class RewardSweepBatchService {
     }
 
     private void validateChunkSize(int chunkSize) {
-        if (chunkSize <= 0) {
+        if (chunkSize <= 0 || chunkSize > MAX_CHUNK_SIZE) {
             throw new BusinessException(RewardErrorCode.INVALID_REWARD_SWEEP_BATCH_SIZE);
         }
     }

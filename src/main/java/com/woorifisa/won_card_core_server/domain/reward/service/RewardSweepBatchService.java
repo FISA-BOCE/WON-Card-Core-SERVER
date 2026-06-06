@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @Service
@@ -20,6 +21,7 @@ import java.util.List;
 public class RewardSweepBatchService {
 
     private static final int DEFAULT_CHUNK_SIZE = 300;
+    private static final ZoneId KST = ZoneId.of("Asia/Seoul");
 
     private final RewardSweepBatchExecutionRepository batchRepository;
     private final RewardSweepBatchChunkReservationService reservationService;
@@ -29,7 +31,7 @@ public class RewardSweepBatchService {
         validateBaseMonth(baseMonth);
         validateNoRunningBatch(baseMonth);
 
-        RewardSweepBatchExecution batch = batchRepository.save(RewardSweepBatchExecution.start(baseMonth, LocalDateTime.now()));
+        RewardSweepBatchExecution batch = batchRepository.save(RewardSweepBatchExecution.start(baseMonth, LocalDateTime.now(KST)));
 
         return RewardSweepBatchStartResponse.from(batch);
     }

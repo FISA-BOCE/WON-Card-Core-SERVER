@@ -8,12 +8,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Getter
 @Entity
 @Table(name = "reward_sweep_batch_execution")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class RewardSweepBatchExecution extends BaseTimeEntity {
+
+    private static final ZoneId KST = ZoneId.of("Asia/Seoul");
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -98,7 +101,7 @@ public class RewardSweepBatchExecution extends BaseTimeEntity {
         } else {
             this.status = RewardSweepBatchStatus.PARTIALLY_FAILED;
         }
-        this.completedAt = LocalDateTime.now();
+        this.completedAt = LocalDateTime.now(KST);
     }
 
     public void closeReservation() {

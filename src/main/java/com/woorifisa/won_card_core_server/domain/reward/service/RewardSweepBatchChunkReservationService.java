@@ -17,12 +17,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class RewardSweepBatchChunkReservationService {
+
+    private static final ZoneId KST = ZoneId.of("Asia/Seoul");
 
     private final RewardSweepBatchExecutionRepository batchRepository;
     private final CardPointLedgerRepository pointLedgerRepository;
@@ -54,7 +57,7 @@ public class RewardSweepBatchChunkReservationService {
             return new RewardSweepChunkReservationResult(0, lastSeenId, List.of());
         }
 
-        LocalDateTime requestedAt = LocalDateTime.now();
+        LocalDateTime requestedAt = LocalDateTime.now(KST);
         List<RewardSweepReservedItemResponse> reservedItems = new ArrayList<>();
 
         for (CardPointLedger ledger : candidates) {

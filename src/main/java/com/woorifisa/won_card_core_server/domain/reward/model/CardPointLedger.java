@@ -71,6 +71,15 @@ public class CardPointLedger extends BaseTimeEntity {
     @Column(name = "base_month", nullable = false, length = 7)
     private String baseMonth;
 
+    @Column(name = "batch_execution_id")
+    private Long batchExecutionId;
+
+    @Column(name = "idempotency_key", length = 100)
+    private String idempotencyKey;
+
+    @Column(name = "sweep_requested_at")
+    private LocalDateTime sweepRequestedAt;
+
     @Column(name = "sweep_failure_code", length = 50)
     private String sweepFailureCode;
 
@@ -89,6 +98,20 @@ public class CardPointLedger extends BaseTimeEntity {
         return 0L;
     }
 
+    public void markSweepRequested(
+            Long batchExecutionId,
+            String idempotencyKey,
+            LocalDateTime requestedAt
+    ) {
+        this.batchExecutionId = batchExecutionId;
+        this.sweepRequestId = this.pointLedgerId;
+        this.idempotencyKey = idempotencyKey;
+        this.sweepRequestedAt = requestedAt;
+        this.sweepStatus = SweepStatus.REQUESTED;
+        this.sweepFailureCode = null;
+        this.sweepFailureMessage = null;
+    }
+
     public void markSweepRequested() {
         this.sweepStatus = SweepStatus.REQUESTED;
         this.sweepFailureCode = null;
@@ -98,6 +121,11 @@ public class CardPointLedger extends BaseTimeEntity {
     public void cancelSweepRequested() {
         this.sweepStatus = SweepStatus.NONE;
         this.sweepRequestId = null;
+        this.batchExecutionId = null;
+        this.idempotencyKey = null;
+        this.sweepRequestedAt = null;
+        this.sweepFailureCode = null;
+        this.sweepFailureMessage = null;
     }
 
     public void markSweepCompleted() {

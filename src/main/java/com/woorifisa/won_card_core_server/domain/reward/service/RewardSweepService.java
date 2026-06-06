@@ -7,18 +7,22 @@ import com.woorifisa.won_card_core_server.domain.reward.dto.request.RewardSweepR
 import com.woorifisa.won_card_core_server.domain.reward.dto.response.*;
 import com.woorifisa.won_card_core_server.domain.reward.exception.code.RewardErrorCode;
 import com.woorifisa.won_card_core_server.domain.reward.model.CardPointLedger;
+import com.woorifisa.won_card_core_server.domain.reward.model.RewardSweepBatchExecution;
 import com.woorifisa.won_card_core_server.domain.reward.model.enums.RewardProcessStatus;
 import com.woorifisa.won_card_core_server.domain.reward.model.enums.SweepStatus;
 import com.woorifisa.won_card_core_server.domain.reward.repository.CardPointLedgerRepository;
+import com.woorifisa.won_card_core_server.domain.reward.repository.RewardSweepBatchExecutionRepository;
 import com.woorifisa.won_card_core_server.domain.reward.service.validator.RewardLedgerValidator;
 import com.woorifisa.won_card_core_server.global.exception.handler.BusinessException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -27,6 +31,7 @@ public class RewardSweepService {
     private final CardPointLedgerRepository cardPointLedgerRepository;
     private final CardPerformanceRepository cardPerformanceRepository;
     private final RewardLedgerValidator rewardLedgerValidator;
+    private final RewardSweepBatchExecutionRepository batchRepository;
 
     @Transactional
     public RewardSweepRequestResponse requestSweep(UUID cardUserUuid, Long pointLedgerId) {
@@ -129,8 +134,10 @@ public class RewardSweepService {
 
         if (requestedResultStatus == SweepStatus.COMPLETED) {
             pointLedger.markSweepCompleted();
+            increaseBatchCompleted(pointLedger.getBatchExecutionId());
         } else {
-            pointLedger.markSweepFailed(request.failureCode(), request.failureMessage());
+            pointLedger.markSweepFailed(request.sweepFailureCode(), request.sweepFailureMessage());
+            increaseBatchFailed(pointLedger.getBatchExecutionId());
         }
 
         return RewardSweepResultResponse.from(pointLedger);
@@ -165,4 +172,29 @@ public class RewardSweepService {
             throw new BusinessException(RewardErrorCode.REWARD_SWEEP_ALREADY_REQUESTED);
         }
     }
+
+    private void increaseBatchCompleted(Long batchExecutionId) {
+        if (batchExecutionId == null) {
+            return;
+        }
+
+        batchRepository.findByIdForUpdate(batchExecutionId)
+                .ifPresentOrElse(
+                        RewardSweepBatchExecution::increaseCompleted,
+                        () -> log.warn("스윕 배치 완료 집계 대상이 없습니다. batchExecutionId={}", batchExecutionId)
+                );
+    }
+
+    private void increaseBatchFailed(Long batchExecutionId) {
+        if (batchExecutionId == null) {
+            return;
+        }
+
+        batchRepository.findByIdForUpdate(batchExecutionId)
+                .ifPresentOrElse(
+                        RewardSweepBatchExecution::increaseFailed,
+                        () -> log.warn("스윕 배치 실패 집계 대상이 없습니다. batchExecutionId={}", batchExecutionId)
+                );
+    }
+
 }

@@ -74,7 +74,7 @@ class InternalRewardLedgerApiTest {
                         get("/internal/cards/rewards/ledger")
                                 .param("type", "EARN")
                                 .header("X-Card-User-UUID", CARD_USER_UUID.toString())
-                                .header("X-Service-ID", "WON-CARD-CHANNEL")
+                                .header("X-Service-ID", "won-card-channel")
                                 .header("X-Transaction-ID", "TX-20260512-RWD02")
                 )
                 .andExpect(status().isOk())
@@ -108,7 +108,7 @@ class InternalRewardLedgerApiTest {
         mockMvc.perform(
                         get("/internal/cards/rewards/ledger/{pointLedgerId}", pointLedgerId)
                                 .header("X-Card-User-UUID", CARD_USER_UUID.toString())
-                                .header("X-Service-ID", "WON-CARD-CHANNEL")
+                                .header("X-Service-ID", "won-card-channel")
                                 .header("X-Transaction-ID", "TX-20260512-RWD03")
                 )
                 .andExpect(status().isOk())
@@ -139,7 +139,7 @@ class InternalRewardLedgerApiTest {
         mockMvc.perform(
                         get("/internal/cards/rewards/ledger")
                                 .header("X-Card-User-UUID", CARD_USER_UUID.toString())
-                                .header("X-Service-ID", "WON-CARD-CHANNEL")
+                                .header("X-Service-ID", "won-card-channel")
                                 .header("X-Transaction-ID", "TX-20260512-RWD02")
                 )
                 .andExpect(status().isOk())
@@ -171,7 +171,7 @@ class InternalRewardLedgerApiTest {
         mockMvc.perform(
                         get("/internal/cards/rewards/monthly")
                                 .header("X-User-UUID", USER_UUID.toString())
-                                .header("X-Service-ID", "WON-CARD-CHANNEL")
+                                .header("X-Service-ID", "won-card-channel")
                                 .header("X-Transaction-ID", "TX-20260512-RWD04")
                 )
                 .andExpect(status().isOk())

@@ -76,7 +76,7 @@ class InternalCardApiTest {
         mockMvc.perform(
                         post("/internal/cards/applications")
                                 .header("X-User-UUID", USER_UUID.toString())
-                                .header("X-Service-ID", "WON-CARD-CHANNEL")
+                                .header("X-Service-ID", "won-card-channel")
                                 .header("X-Transaction-ID", "TX-20260526-CARD00")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request))
@@ -111,7 +111,7 @@ class InternalCardApiTest {
         mockMvc.perform(
                         get("/internal/cards")
                                 .header("X-User-UUID", USER_UUID.toString())
-                                .header("X-Service-ID", "WON-CARD-CHANNEL")
+                                .header("X-Service-ID", "won-card-channel")
                                 .header("X-Transaction-ID", "TX-20260526-CARD01")
                 )
                 .andExpect(status().isOk())
@@ -136,7 +136,7 @@ class InternalCardApiTest {
         mockMvc.perform(
                         get("/internal/cards")
                                 .header("X-User-UUID", USER_UUID.toString())
-                                .header("X-Service-ID", "WON-CARD-CHANNEL")
+                                .header("X-Service-ID", "won-card-channel")
                                 .header("X-Transaction-ID", "TX-20260526-CARD02")
                 )
                 .andExpect(status().isOk())

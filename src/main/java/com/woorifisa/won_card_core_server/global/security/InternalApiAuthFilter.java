@@ -7,6 +7,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.List;
 
+@Slf4j
 @Component
 public class InternalApiAuthFilter extends OncePerRequestFilter {
 
@@ -38,6 +40,7 @@ public class InternalApiAuthFilter extends OncePerRequestFilter {
         this.objectMapper = objectMapper;
         this.expectedServiceId = normalize(expectedServiceId);
         this.expectedApiKey = normalize(expectedApiKey);
+        validateInternalAuthProperties();
     }
 
     @Override
@@ -89,12 +92,27 @@ public class InternalApiAuthFilter extends OncePerRequestFilter {
     }
 
     private boolean isValidInternalRequest(String serviceId, String apiKey) {
+        if (!hasText(expectedServiceId) || !hasText(expectedApiKey)) {
+            log.error("내부 API 인증 설정이 누락되었습니다.");
+            return false;
+        }
+
         return constantTimeEquals(expectedServiceId, serviceId)
                 && constantTimeEquals(expectedApiKey, apiKey);
     }
 
     private String normalize(String value) {
         return value == null ? "" : value.trim();
+    }
+
+    private void validateInternalAuthProperties() {
+        if (!hasText(expectedServiceId) || !hasText(expectedApiKey)) {
+            log.error("internal.auth.service-id and internal.auth.api-key must not be blank.");
+        }
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 
     private boolean constantTimeEquals(String expected, String actual) {

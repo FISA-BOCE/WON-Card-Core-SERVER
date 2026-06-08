@@ -2,10 +2,10 @@ pipeline {
     agent any
 
     environment {
-        WAS_HOST = "${env.CARD_CORE_WAS_HOST}"
-        WAS_USER = "${env.CARD_CORE_WAS_USER}"
-        APP_DIR = "${env.CARD_CORE_APP_DIR}"
-        SSH_CREDENTIAL_ID = "${env.CARD_CORE_SSH_CREDENTIAL_ID}"
+        WAS_HOSTS = "${params.CARD_CORE_WAS_HOSTS}"
+        WAS_USER = "${params.CARD_CORE_WAS_USER}"
+        APP_DIR = "${params.CARD_CORE_APP_DIR}"
+        SSH_CREDENTIAL_ID = "${params.CARD_CORE_SSH_CREDENTIAL_ID}"
         JAR_NAME = "won-card-core-${BUILD_NUMBER}.jar"
     }
 
@@ -16,42 +16,42 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Test & Build') {
             steps {
                 sh 'chmod +x ./gradlew'
-                sh './gradlew clean bootJar -x test'
+                sh 'SPRING_PROFILES_ACTIVE=test ./gradlew clean test bootJar'
                 sh 'cp build/libs/*.jar ${JAR_NAME}'
             }
         }
 
-        stage('Transfer') {
-            steps {
-                sshagent(credentials: [env.SSH_CREDENTIAL_ID]) {
-                    sh '''
-                    scp -o StrictHostKeyChecking=no "${JAR_NAME}" "${WAS_USER}@${WAS_HOST}:/tmp/"
-                    '''
+        stage('Transfer & Deploy') {
+            when {
+                expression {
+                    env.BRANCH_NAME == 'main' || env.GIT_BRANCH == 'origin/main' || env.GIT_BRANCH == 'main'
                 }
             }
-        }
-
-        stage('Deploy') {
             steps {
                 sshagent(credentials: [env.SSH_CREDENTIAL_ID]) {
-                    sh '''
-                    ssh -o StrictHostKeyChecking=no "${WAS_USER}@${WAS_HOST}" "
-                      sudo mv /tmp/${JAR_NAME} ${APP_DIR}/releases/ &&
-                      sudo chown deploy:deploy ${APP_DIR}/releases/${JAR_NAME} &&
-                      cd ${APP_DIR} &&
-                      sudo -u deploy ln -sfn releases/${JAR_NAME} app.jar &&
-                      sudo systemctl restart won-card-core &&
-                      for i in 1 2 3 4 5 6; do
-                        curl -f http://localhost:8083/actuator/health && exit 0
-                        sleep 5
-                      done
-                      sudo systemctl status won-card-core --no-pager
-                      exit 1
-                    "
-                    '''
+                    script {
+                        for (host in env.WAS_HOSTS.split()) {
+                            sh """
+                            scp "${JAR_NAME}" "${WAS_USER}@${host}:/tmp/"
+                            ssh "${WAS_USER}@${host}" "
+                              sudo mv /tmp/${JAR_NAME} ${APP_DIR}/releases/ &&
+                              sudo chown deploy:deploy ${APP_DIR}/releases/${JAR_NAME} &&
+                              cd ${APP_DIR} &&
+                              sudo -u deploy ln -sfn releases/${JAR_NAME} app.jar &&
+                              sudo systemctl restart won-card-core &&
+                              for i in 1 2 3 4 5 6; do
+                                curl -fsS --connect-timeout 2 --max-time 5 http://localhost:8083/actuator/health && exit 0
+                                sleep 5
+                              done
+                              sudo systemctl status won-card-core --no-pager
+                              exit 1
+                            "
+                            """
+                        }
+                    }
                 }
             }
         }
@@ -59,10 +59,10 @@ pipeline {
 
     post {
         success {
-            echo 'CI/CD deployment succeeded.'
+            echo 'Pipeline succeeded.'
         }
         failure {
-            echo 'CI/CD deployment failed.'
+            echo 'Pipeline failed.'
         }
     }
 }

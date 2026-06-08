@@ -1,0 +1,26 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:won_card_core_test;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+
+app:
+  security:
+    jwt-secret: test-card-core-jwt-secret-for-ci-only-please-do-not-use
+    crypto-secret: eGVzaC1jYXJsLWNoYW5uZWwtYWVzLWtleS0zMmJ5dGU=
+    access-token-expiration-seconds: 3600
+    refresh-token-expiration-seconds: 1209600
+
+internal:
+  auth:
+    service-id: won-card-channel
+    api-key: test-internal-api-key

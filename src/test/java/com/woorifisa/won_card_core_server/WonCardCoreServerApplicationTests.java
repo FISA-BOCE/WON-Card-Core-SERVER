@@ -63,6 +63,7 @@ class WonCardCoreServerApplicationTests {
         assertThat(response.cardUserUuid()).isNotNull();
         assertThat(response.cardUuid()).isNotNull();
         assertThat(response.cardNoDisplay()).startsWith("****-****-****-");
+        assertThat(response.issuedAt()).isNotNull();
         assertThat(response.cardStatus()).isEqualTo("ACTIVE");
         CardUser savedCardUser = cardUserRepository.findByUserUuid(userUuid).orElseThrow();
         assertThat(response.cardUserUuid()).isEqualTo(savedCardUser.getCardUserUuid());
@@ -91,6 +92,7 @@ class WonCardCoreServerApplicationTests {
         CardApplicationResponse response = cardApplicationService.createCardApplication(userUuid, request);
 
         assertThat(response.cardUserUuid()).isEqualTo(existingCardUser.getCardUserUuid());
+        assertThat(response.issuedAt()).isNotNull();
         assertThat(cardUserRepository.count()).isEqualTo(1);
         assertThat(cardRepository.count()).isEqualTo(1);
         assertThat(cardPerformanceRepository.count()).isEqualTo(1);

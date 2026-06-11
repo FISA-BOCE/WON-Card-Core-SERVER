@@ -4,6 +4,7 @@ import com.woorifisa.won_card_core_server.domain.reward.model.CardPointLedger;
 import com.woorifisa.won_card_core_server.domain.reward.model.enums.RewardProcessStatus;
 import com.woorifisa.won_card_core_server.domain.reward.model.enums.SweepStatus;
 import jakarta.persistence.LockModeType;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -107,5 +108,39 @@ public interface CardPointLedgerRepository extends JpaRepository<CardPointLedger
             @Param("lastSeenId") Long lastSeenId,
             Pageable pageable
     );
+
+    @Query("""
+            select l
+            from CardPointLedger l
+            where (:status is null or l.sweepStatus = :status)
+              and (:baseMonth is null or l.baseMonth = :baseMonth)
+              and (:cardUserUuid is null or l.cardUserUuid = :cardUserUuid)
+              and (:sweepRequestId is null or l.sweepRequestId = :sweepRequestId)
+            order by l.updatedAt desc, l.pointLedgerId desc
+            """)
+    Page<CardPointLedger> findAdminSweepRequests(
+            @Param("status") SweepStatus status,
+            @Param("baseMonth") String baseMonth,
+            @Param("cardUserUuid") UUID cardUserUuid,
+            @Param("sweepRequestId") Long sweepRequestId,
+            Pageable pageable
+    );
+
+    @Query("""
+            select count(l)
+            from CardPointLedger l
+            where (:status is null or l.sweepStatus = :status)
+              and (:baseMonth is null or l.baseMonth = :baseMonth)
+              and (:cardUserUuid is null or l.cardUserUuid = :cardUserUuid)
+              and (:sweepRequestId is null or l.sweepRequestId = :sweepRequestId)
+            """)
+    long countAdminSweepRequests(
+            @Param("status") SweepStatus status,
+            @Param("baseMonth") String baseMonth,
+            @Param("cardUserUuid") UUID cardUserUuid,
+            @Param("sweepRequestId") Long sweepRequestId
+    );
+
+    Optional<CardPointLedger> findBySweepRequestId(Long sweepRequestId);
 
 }

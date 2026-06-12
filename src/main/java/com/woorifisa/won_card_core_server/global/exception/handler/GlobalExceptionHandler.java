@@ -37,7 +37,7 @@ public class GlobalExceptionHandler {
             MethodArgumentTypeMismatchException.class
     })
     public ResponseEntity<ErrorResponse> handleBadRequest(Exception e, HttpServletRequest request) {
-        log.warn("bad request: method={} uri={} message={}", request.getMethod(), request.getRequestURI(), e.getMessage());
+        log.warn("bad request: method={} uri={} exception={}", request.getMethod(), request.getRequestURI(), e.getClass().getSimpleName());
         return ResponseEntity
                 .status(CommonErrorCode.INVALID_REQUEST.getHttpStatus())
                 .body(ErrorResponse.of(CommonErrorCode.INVALID_REQUEST));

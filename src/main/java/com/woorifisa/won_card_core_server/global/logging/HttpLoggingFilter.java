@@ -21,11 +21,18 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         long startTime = System.currentTimeMillis();
+        boolean loggedOnException = false;
         try {
             filterChain.doFilter(request, response);
+        } catch (Exception ex) {
+            long elapsed = System.currentTimeMillis() - startTime;
+            log.error("http error method={} uri={} status={} elapsed_ms={}",
+                    request.getMethod(), request.getRequestURI(), 500, elapsed, ex);
+            loggedOnException = true;
+            throw ex;
         } finally {
             int status = response.getStatus();
-            if (status >= 400) {
+            if (!loggedOnException && status >= 400) {
                 long elapsed = System.currentTimeMillis() - startTime;
                 String method = request.getMethod();
                 String uri = request.getRequestURI();

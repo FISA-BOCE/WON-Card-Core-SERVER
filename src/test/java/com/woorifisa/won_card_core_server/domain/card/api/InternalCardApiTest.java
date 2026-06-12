@@ -64,8 +64,8 @@ class InternalCardApiTest {
                 "encrypted-address"
         );
         CardApplicationResponse response = new CardApplicationResponse(
-                CARD_USER_UUID,
                 CARD_UUID,
+                CARD_USER_UUID,
                 "****-****-****-1234",
                 LocalDateTime.of(2026, 5, 25, 23, 42, 29),
                 "ACTIVE"
@@ -85,9 +85,10 @@ class InternalCardApiTest {
                 .andExpect(jsonPath("$.status").value(201))
                 .andExpect(jsonPath("$.code").value("CARD_201_001"))
                 .andExpect(jsonPath("$.message").value("카드 신청이 완료되었습니다."))
-                .andExpect(jsonPath("$.data.cardUserUuid").value(CARD_USER_UUID.toString()))
                 .andExpect(jsonPath("$.data.cardUuid").value(CARD_UUID.toString()))
+                .andExpect(jsonPath("$.data.cardUserUuid").value(CARD_USER_UUID.toString()))
                 .andExpect(jsonPath("$.data.cardNoDisplay").value("****-****-****-1234"))
+                .andExpect(jsonPath("$.data.issuedAt").value("2026-05-25T23:42:29"))
                 .andExpect(jsonPath("$.data.cardStatus").value("ACTIVE"));
 
         then(cardApplicationService).should().createCardApplication(USER_UUID, request);

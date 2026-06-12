@@ -23,7 +23,10 @@ public enum SuccessStatus {
     REWARD_SWEEP_REQUEST_CANCELLED(HttpStatus.OK, "SWEEP_200_003", "리워드 원장 스윕 요청이 취소되었습니다."),
     REWARD_SWEEP_RESULT_APPLIED(HttpStatus.OK, "SWEEP_200_004", "스윕 최종 결과가 반영되었습니다."),
     REWARD_SWEEP_BATCH_STARTED(HttpStatus.OK, "SWEEP_200_005", "스윕 배치 실행이 시작되었습니다."),
-    REWARD_SWEEP_BATCH_RESERVED(HttpStatus.OK, "SWEEP_200_006", "스윕 배치 후보 선점이 완료되었습니다.");
+    REWARD_SWEEP_BATCH_RESERVED(HttpStatus.OK, "SWEEP_200_006", "스윕 배치 후보 선점이 완료되었습니다."),
+    ADMIN_SWEEP_REQUESTS_FOUND(HttpStatus.OK, "ADMIN_SWEEP_200_001", "관리자 스윕 요청 목록 조회가 완료되었습니다."),
+    ADMIN_SWEEP_REQUEST_DETAIL_FOUND(HttpStatus.OK, "ADMIN_SWEEP_200_002", "관리자 스윕 요청 상세 조회가 완료되었습니다."),
+    ADMIN_SWEEP_REQUEST_SUMMARY_FOUND(HttpStatus.OK, "ADMIN_SWEEP_200_003", "관리자 스윕 요청 요약 조회가 완료되었습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
